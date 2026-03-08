@@ -59,6 +59,7 @@ export default function LoginForm(){
             router.replace('/login')
         }
         localStorage.removeItem('userWelcome')
+        localStorage.removeItem('texts')
 
     }, [searchParams, router])
 

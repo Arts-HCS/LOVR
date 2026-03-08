@@ -13,6 +13,8 @@
   --soft-red: #c53a3a;
 }
 
+
+
 .row {
   display: grid;
   gap: 12px;
@@ -62,6 +64,13 @@
   opacity: 1;
 }
 
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.76);
+  pointer-events: none; /* opcional */
+}
+
 /* --------------tasks-------- */
 
 .task-box{
@@ -71,17 +80,18 @@
   height: fit-content;
   position: relative; 
   box-shadow: 0 5px 10px rgba(0,0,0,0.2);
-  background-color: #595fb12b;
+  background-color: #595fb13e;
   border: 1px solid #505490;
   border-radius: 8px;
   padding: 0.8rem;
   padding-bottom: 1.2rem;
+  transition: all 0.3s ease 0s;
 }
 
 .task-box button{
   position: absolute;
   bottom: -20px;
-  left: 16px;
+  right: 16px;
   cursor: pointer;
   height: 32px;
   width: 60px;
@@ -89,6 +99,16 @@
   border: 1px solid #595FB1;
   border-radius: 13px;
   color: #b9bbe2;
+}
+
+.task-box .context-btn{
+  right: 90px;
+}
+
+.task-box .answer-btn{
+  right: auto;
+  left: 30px;
+  background-color: #54578c;
 }
 
 .task-box h5{
@@ -132,28 +152,48 @@
 }
 
 .task-box-green{
-  background-color: #59b1632b;
-  border: 1px solid #4b8056;
+  background-color: #4b50922b;
+  border: 1px solid #43477c;
   border-radius: 8px;
   padding: 0.8rem;
   padding-bottom: 1.2rem;
 }
 
 .task-box-green span{
-  background-color: #90bf8a4a;
+  background-color: #7b7ea54a;
 }
 
 .task-box-green p{
-  color: #c7d7c0da;
+  color: #c0c3d7da;
 }
 
 .task-box-green h5{
-  color: #a3be9dc4;
+  color: #9da7bec4;
 }
 
 .task-box-green button{
-  background-color: #365337;
-  border: 1px solid #4b8056;
+  background-color: #383950;
+  border: 1px solid #43477C;
+}
+
+.task-box-selected{
+  transform: scale(0.9);
+  background-color: #46343C;
+  border: 1px solid #835A65;
+}
+
+.task-box-selected button{
+  background-color: #46343C;
+  border: 1px solid #835A65;  
+  color: #bc939e;
+}
+
+.task-box-selected h5{
+  color: #ad8590;
+}
+
+.task-box-seleted span{
+  background-color: #533a45;
 }
 
 /* ------------Calendar--------- */
@@ -240,6 +280,20 @@
       width: 100%;
     }
   }
+
+  .white-blur{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(150deg, #eb6f6f4f, #8448ac44);
+    filter: blur(100px);
+    z-index: 0;
+    pointer-events: none;
+    animation: rise-up 2s ease-out forwards;
+  }
+
   .star{
     position: absolute;
     top: -5%;
@@ -301,6 +355,10 @@
     background-image: linear-gradient(160deg, #eb6f6f, #8448ac);
     -webkit-background-clip: text;
    -webkit-text-fill-color: transparent;
+  }
+
+  .lovr-background{
+    background: linear-gradient(130deg, #eb6f6f32, #6d3f8088);
   }
 
   .register-color{
@@ -374,8 +432,15 @@
     position: absolute;
     bottom: 8px;
     right: 0;
-    box-shadow: -10px 0 5px #202225;
     transition: all 0.3s ease 0s;
+  }
+
+  .task-circle-trash{
+    right: 35px;
+    cursor: pointer;
+    background-color: #c9c5c0;
+    color: #2f2b2b;
+    
   }
 
   .task-status-zero{
@@ -384,11 +449,12 @@
   }
   .task-status-one{
     background-color: #b19e59;
-    color: #665d3c
+    color: #665d3c;
+    transform: rotate(360deg);
   }
   .task-status-two{
     background-color: #b15959;
-    color: #732626
+    color: #732626;
   }
   .task-status-three{
     background-color: #595FB1;
@@ -398,10 +464,14 @@
   .task-status-four{
     background-color: #599bb1;
     color: #255160;
-
   }
-}
+  .task-status-five{
+    background-color: #269380;
+    color: #004D40;
+    transform: rotate(0deg);
+  }
 
+}
 
 body {
   font-family: var(--font-urbanist);

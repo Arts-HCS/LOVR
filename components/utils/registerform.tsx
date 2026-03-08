@@ -115,7 +115,7 @@ export default function RegisterForm({ setBaseText, setGottenName, setSuccess }:
                 placeholder="Confirma tu contraseña..." 
             />
             {error && <h1 className="text-center text-2xl mb-4 bg-(--red-color) rounded-2xl">Las contraseñas no coinciden</h1>}
-            <button type="submit" className="bg-(--blackground) text-(--white-color) p-3 rounded-2xl hover:bg-(--background) hover:text-(--black-color) transition-all cursor-pointer">Registrarme</button>
+            <button onClick={(e) => e.target.value = "Cargando..."} type="submit" className="bg-(--blackground) text-(--white-color) p-3 rounded-2xl hover:bg-(--background) hover:text-(--black-color) transition-all cursor-pointer">Registrarme</button>
             
         </form>
     )

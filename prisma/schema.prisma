@@ -8,15 +8,17 @@ datasource db {
 }
 
 model Usuario {
-  id       String  @id @default(cuid())
-  name     String  @unique
-  apodo    String?
-  email    String  @unique
-  password String
+  id        String  @id @default(cuid())
+  name      String  @unique
+  apodo     String?
+  email     String  @unique
+  gender    String?
+  password  String
+  modelName String?
 
-  createdAt DateTime   @default(now())
-  tareas    Tarea[]
-  contextos Contexto[]
+  createdAt DateTime @default(now())
+  Tarea     Tarea[]
+  Docs      Docs[]
 }
 
 model Tarea {
@@ -27,19 +29,22 @@ model Tarea {
   day       Int
   month     Int
   year      Int
+  desc      String?
+  baseID    String   @unique
+  context   Json
+  generated String?
+  number    Int?
   createdAt DateTime @default(now())
 
   relationUser Usuario @relation(fields: [userId], references: [id])
 }
 
-model Contexto {
-  id            Int     @id @default(autoincrement())
-  userId        String?
-  longitudFrase Int
-  adjFrec       Int
-  conFrec       Int
-  formalidad    Int
-  pausas        Int
+model Docs {
+  id        Int      @id @default(autoincrement())
+  userID    String
+  title     String?
+  content   String?
+  createdAt DateTime @default(now())
 
-  Usuario Usuario? @relation(fields: [userId], references: [id])
+  relationUser Usuario @relation(fields: [userID], references: [id])
 }

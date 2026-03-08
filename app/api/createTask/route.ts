@@ -1,85 +1,104 @@
 import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 import OpenAI from "openai";
-import dotenv from "dotenv"
-dotenv.config()
+import dotenv from "dotenv";
+dotenv.config();
 
-const apiKey = process.env.OPENAI_API;  
+const apiKey = process.env.OPENAI_API;
 
 const client = new OpenAI({
-    apiKey: apiKey
+  apiKey: apiKey,
 });
 
+export async function POST(req: Request) {
 
-export async function POST(req: Request){
-    const now = new Date();
-    const today = now.toLocaleDateString("en-CA", {
-        timeZone: "America/Mexico_City"
-    });
-    
-    const time = now.toLocaleTimeString("es-MX", {
-        timeZone: "America/Mexico_City",
-        hour12: false
-    });
+  const now = new Date();
+  const today = now.toLocaleDateString("en-CA", {
+    timeZone: "America/Mexico_City",
+  });
 
-    const body = await req.json()
-    const {content} = body;
+  const time = now.toLocaleTimeString("es-MX", {
+    timeZone: "America/Mexico_City",
+    hour12: false,
+  });
 
-    const response = await client.chat.completions.create({
-        model: "gpt-5-mini",
-        messages: [
-            {
-                role: "system",
-                content: `
+  const body = await req.json();
+  const { content } = body;
+
+  const response = await client.chat.completions.create({
+    model: "gpt-5-nano",
+    messages: [
+      {
+        role: "system",
+        content: `
                 Hoy es ${today}.
                 Hora actual ${time}.
                 
-                Sistema para extraer tareas desde un texto en español.
-                Si el input tiene contenido sexual, responde solo: Error
-                Si el input contiene groserías pero lo que dice tiene sentido, responde con normalidad.
-                Ninguna de tus respuestas "Error" debe contener puntos o comas.
+                Sistema para extraer tareas desde texto en español.
 
-                Devuelve una sola línea con cuatro campos, separados por comas y en este orden:
-                fecha (YYYY-MM-DD), hora (HH:MM 24h), descripción, título.
+SALIDA:
+Devuelve exactamente una sola línea con cinco campos separados por comas en este orden:
+fecha (YYYY-MM-DD), hora (HH:MM 24h), descripción, título, contexto
 
-                Reglas:
+No agregues texto extra.
+No agregues explicaciones.
+No agregues saltos de línea.
 
-                    Sin texto extra.
+REGLAS DE ERROR:
 
-                    "mediodía" = 12:00, "medianoche" = 00:00.
+- Si el input contiene contenido sexual explícito: responde exactamente Error
+- Si el texto no tiene sentido o contiene caracteres sin coherencia: responde exactamente Error
+- Las respuestas Error no deben contener puntos, comas ni texto adicional
 
-                    Corrige errores ortográficos.
+Las groserías están permitidas si el mensaje tiene sentido.
 
-                    Si no hay día y la hora es después de las 17:00, devuelve mañana.
+REGLAS DE FECHA Y HORA:
 
-                    Si se dice "mañana": devuelve el día después de hoy.
+- "mediodía" = 12:00
+- "medianoche" = 00:00
+- Sin hora explícita = 12:00
+- Si no se especifica mañana o tarde, asumir tarde
+- Si no se menciona día:
+- Si la hora detectada es posterior a 17:00, usar mañana
+- Si se dice "mañana", usar el día siguiente al actual
+- No inventar fechas
+- Si la hora mencionada está entre "la una", "las dos", "las tres" o "las cuatro", debe considerarse como hora de la tarde, no de la mañana. A menos que se especifique lo contrario.
 
-                    Si no se especifica si es hora de mañana o tarde, escoge tarde.
+REGLAS DE TÍTULO:
 
-                    Sin descripción: campo vacío.
+- Corrige errores ortográficos leves
+- Si solo se menciona una materia (ej. "Computación"), responde como: "Trabajo de Computación"
+- Si se menciona únicamente un nombre propio (ej. "Patrick"), responde como: "Tarea de Patrick"
+- Si no hay título claro, créalo breve y coherente
+- Si se usan expresiones como "este", "mi este", "mi esta", "la cosa esta" refiriéndose a una tarea cuyo nombre no se recuerda, usar únicamente la materia como título (ej. "Mi este de programación" → "Trabajo de Programación") (ej. "La cosa esta de francés" → "Trabajo/Actividad de Francés")
+- Si se usan verbos como "Terminar", "Acabar" o similares, ignóralos y devuelve solo la tarea. (ej. "Terminar lo de estadística" → "Trabajo/Actividad de Estadística").
+- No inventar datos faltantes que no puedan inferirse razonablemente
+- Conserva las palabras del usuario al momento de crear la tarea. Por ejemplo, si el usuario escribe "Reporte de física", no cambiarlo a "Trabajo de física", sino mantenrlo como "Reporte".
 
-                    Cuando se diga una materia pero no se especifique el tipo de tarea, di que es una actividad, no una clase.
+REGLAS DE DESCRIPCIÓN:
 
-                    Sin hora: 12:00.
+- Si no hay descripción clara, dejar el campo vacío
+- Si hay información adicional relevante, incluirla como descripción breve.
+- Las características de la tarea como el tema o detalles se deben tomar como descripción, no fechas ni horas ni el títuloo de la tarea en sí.
 
-                    Sin título claro: créalo breve.
+REGLAS DE CONTEXTO:
 
-                    Sin acción clara: Error.
+- Siempre devolver el campo contexto como ""
 
-                    No inventes datos.
+FORMATO FINAL:
+Una sola línea:
+fecha,hora,descripción,título,contexto
+                    `,
+      },
+      {
+        role: "user",
+        content,
+      },
+    ],
+  });
 
-                    Si el texto contiene una materia y una fecha, responde con normalidad.
-                    
-                    Si una palabra tiene errores ortográficos leeves, corrígelo, pero si contiene carácteres sin sentido, responde: Error
-                    `
-            },
-            {
-                role: "user",
-                content
-            }
-        ]
-    });
+  const { choices } = response;
+  const answer = choices[0].message.content;
 
-    const { choices } = response;
-    const answer = choices[0].message.content;
-    return NextResponse.json({ answer })
+  return NextResponse.json({ answer });
 }

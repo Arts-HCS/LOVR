@@ -6,26 +6,31 @@ const prisma = new PrismaClient();
 export async function POST(req:Request){
     const data = await req.json()
     const {tasks} = data
-    tasks.forEach(async (task:any)=>{
-        const {id, date, time, desc,title, userID} = task
-        console.log(userID)
-        const stringed = `${userID}`
-        const separatedDate = date.split("-")
-        const year = parseInt(separatedDate[0])
-        const month = parseInt(separatedDate[1])
-        const day = parseInt(separatedDate[2])
+
+    for (const task of tasks) {
+        const { id, date, time, desc, title, userID, context } = task
+    
+        if (await prisma.tarea.findFirst({
+            where: { baseID: id }
+        })) continue
+    
+        const [year, month, day] = date.split("-").map(Number)
+    
         await prisma.tarea.create({
             data: {
-                userId: stringed,
+                userId: String(userID),
                 title,
                 hour: time,
                 day,
                 month,
-                year
+                year,
+                desc,
+                context,
+                baseID: id
             }
         })
-    })
-
+    }
+    
     return NextResponse.json({
         message: "exito"
     })

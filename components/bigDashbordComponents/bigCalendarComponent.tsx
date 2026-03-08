@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export default function BigCalendarComponent({ active, tasks, setActive }: any) {
+export default function BigCalendarComponent({ active, tasks, setActive, savedTasks }: any) {
   const weekDays = [
     "Domingo",
     "Lunes",
@@ -67,6 +67,22 @@ export default function BigCalendarComponent({ active, tasks, setActive }: any) 
     tasksByDay[d].push([task.title, task.time]);
   });
 
+
+  if (savedTasks.length > 0) {
+    savedTasks.forEach((task:any)=>{
+    if (task.day === undefined) return
+    
+    if (task.year !== year || task.month - 1 !== month) return
+    
+    if (!tasksByDay[task.day]) {
+      tasksByDay[task.day] = []
+    }
+    tasksByDay[task.day].push([task.title,task.hour,task.id])
+  })
+
+  }
+  
+
   const actualDate = () => {
     if (!selectedDate) return;
     const fecha = new Date(selectedDate[0], selectedDate[1], selectedDate[2]);
@@ -102,7 +118,7 @@ export default function BigCalendarComponent({ active, tasks, setActive }: any) 
           {selectedDayTasks.map((task, i) => (
             <div
               key={i}
-              className="bg-[#595FB1] text-[#040404] rounded px-2 py-1.5 text-[17px] w-full flex items-center justify-start cursor-pointer"
+              className={` ${task.length ===3 ? "bg-[#4b8056]":"bg-[#595FB1]"} text-[#040404] rounded px-2 py-1.5 text-[17px] w-full flex items-center justify-start cursor-pointer`}
               onClick={()=> setActive([2])}
             >
               <p className="w-full flex">
@@ -185,7 +201,7 @@ export default function BigCalendarComponent({ active, tasks, setActive }: any) 
                 key={i}
                 onClick={() => setSelectedDate([year, month, day])}
                 className={`
-                rounded-lg border cursor-pointer transition h-32 relative px-2 pt-7 overflow-y-scroll shadow-2xl ${
+                rounded-lg border cursor-pointer transition h-32 relative px-2 pt-7 pb-2 overflow-y-scroll shadow-2xl ${
                   selectedDate ? "w-31" : "w-41"
                 }
                 ${
@@ -201,7 +217,7 @@ export default function BigCalendarComponent({ active, tasks, setActive }: any) 
                     {dayTasks.map((task: any, index: number) => (
                       <span
                         key={index}
-                        className="text-[13px] bg-[#595FB1] text-[#111112] rounded px-1 py-0.5 truncate w-full"
+                        className={`text-[13px] ${task.length ===3 ? "bg-[#4b8056]":"bg-[#595FB1]" }  text-[#111112] rounded px-1 py-0.5 truncate w-full`}
                       >
                         {task[0]}
                       </span>
