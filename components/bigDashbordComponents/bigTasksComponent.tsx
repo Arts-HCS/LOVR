@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import TaskContext from "../taskContextComponents/taskContext";
 import GeneratedTaskView from "../taskContextComponents/generatedTaskView";
+import { ids } from "googleapis/build/src/apis/ids";
 
 type Props = {
   tasks: any;
@@ -9,6 +10,8 @@ type Props = {
   activeUser?: any;
   savedTasks?: any;
   setSavedTasks?: any;
+  setTasksGeneradas?: any;
+  tasksGeneradas?: any
 };
 
 function formatearFecha(fechaTexto?: string) {
@@ -35,6 +38,8 @@ export default function WritingComponent({
   activeUser,
   savedTasks,
   setSavedTasks,
+  setTasksGeneradas,
+  tasksGeneradas
 }: Props) {
   // Juntar tasks actuales y guardadas parte
   const [tasksAnswers, setTasksAnswers] = useState<any>({});
@@ -105,6 +110,8 @@ export default function WritingComponent({
   // Tasks common-route component
 
   const handleDeleteSavedTasks = async (baseID: string) => {
+
+    
     const resp = await fetch("/api/deleteSavedTask", {
       method: "POST",
       headers: {
@@ -122,42 +129,51 @@ export default function WritingComponent({
         prev.filter((task: any) => task.baseID !== baseID)
       );
     }
+    setTasksGeneradas((prev:any)=> {
+      return prev.filter((task:any)=> task.id !== baseID)
+    })
   };
 
   const [selectedTask, setSelectedTask] = useState<any>(null);
 
-  // Barra de la derecha
   const [activeRightBar, setActiveRightBar] = useState(false);
 
-  // Taks con respuesta y en espera
+  const [IDsGenerados, setIDsGenerados] = useState<number[]>([]);
 
-  const [tasksGeneradas, setTasksGeneradas] = useState<TaskGenerada[]>([]);
 
   useEffect(() => {
     if (savedTasks.message === "No tasks") return;
+  
+    setTasksGeneradas((prev:any) => {
+  
+      const idsGenerados = prev.map((task:any) => task.id);
+  
+      const savedTasksGenerated = savedTasks.filter(
+        (task:any) =>
+          task.generated !== null &&
+          !idsGenerados.includes(task.baseID)
+      );
+  
+      return [
+        ...prev,
+        ...savedTasksGenerated.map((task:any) => ({
+          id: task.baseID,
+          status: 1,
+          title: task.title,
+          generated: task.generated
+        }))
+      ];
+    });
+  
+  }, []);
 
-    const savedTasksGenerated = savedTasks
-      .filter((task: any) => task.generated !== null && task.generated !== "")
-      .map((task: any) => ({
-        id: task.baseID,
-        status: 1,
-        title: task.title,
-        generated: task.generated,
-      }));
-
-    setTasksGeneradas(savedTasksGenerated);
-  }, [savedTasks]);
-
-  interface TaskGenerada {
-    taskID: string;
-    status: number;
-    title: string;
-    generated: string;
-  }
-  const IDsGenerados = tasksGeneradas.map((task: any) => task.id);
+  useEffect(()=>{
+    setIDsGenerados(tasksGeneradas.map((task:any) => task.id));
+  }, [tasksGeneradas])
 
   // Viewed task. La tarea vista en la derecha de las tareas generadas
   const [viewedTask, setViewedTask] = useState<any>(null);
+
 
   return (
     <section className="h-185 w-full flex items-start justify-start pl-8 pr-0 py-0 pb-0 bg-[#191a1c7d] overflow-scroll ">
@@ -181,8 +197,9 @@ export default function WritingComponent({
               tasksAnswers={tasksAnswers}
               setTasksAnswers={setTasksAnswers}
               setTasksGeneradas={setTasksGeneradas}
-              tasksGeneradas={tasksGeneradas}
               setSelectedTask={setSelectedTask}
+              setSavedTasks={setSavedTasks}
+              IDsGenerados={IDsGenerados}
             ></TaskContext>
           )}
           <div
@@ -237,7 +254,13 @@ export default function WritingComponent({
                   )}
 
                   {IDsGenerados.includes(task.id) && (
-                    <button className="answer-btn">
+                    <button 
+                      className="answer-btn"
+                      onClick= {()=>{
+                        setActiveRightBar(true)
+                        setViewedTask(task)
+                      }}
+                      >
                       <i className="fa-solid fa-check"></i>
                     </button>
                   )}
@@ -285,7 +308,13 @@ export default function WritingComponent({
                     </button>
 
                     {IDsGenerados.includes(task.baseID) && (
-                      <button className="answer-btn">
+                      <button 
+                        className="answer-btn"
+                        onClick= {()=>{
+                          setActiveRightBar(true)
+                          setViewedTask(task)
+                        }}
+                      >
                         <i className="fa-solid fa-check"></i>
                       </button>
                     )}
@@ -331,12 +360,8 @@ export default function WritingComponent({
                   return (
                     <button
                       key={index}
-                      className={`p-2 rounded-lg text-(--white-color) w-full text-left cursor-pointer shadow-[0px_0px_20px_rgba(0,0,0,0.2)] hover:scale-95 hover:bg-[#784e4e97] transition-all lovr-background ${viewedTask?.id === task.id && "border-2 border-[#ae8b8b97] scale-95"}`}
+                      className={`p-2 py-2.5 rounded-lg text-(--white-color) w-full text-left cursor-pointer shadow-[0px_0px_20px_rgba(0,0,0,0.2)] hover:scale-95 hover:bg-[#784e4e97] transition-all lovr-background ${viewedTask?.id === task.id && "border-2 border-[#ae8b8b97] scale-95"}`}
                       onClick={()=>{
-                        // if (viewedTask?.id === task.id) {
-                        //   setViewedTask(null)
-                        //   return
-                        // }
 
                         setViewedTask(task)
                       }}
@@ -358,9 +383,9 @@ export default function WritingComponent({
                   return (
                     <div
                       key={index}
-                      className="p-2 rounded-lg bg-[#c7ac4a5c] text-(--white-color) w-full text-left shadow-[0px_0px_20px_rgba(0,0,0,0.2)] flex items-center truncate"
+                      className="p-2 rounded-lg bg-[#c7ac4a5c] text-(--white-color) w-full text-left px-3 shadow-[0px_0px_20px_rgba(0,0,0,0.2)] flex items-center"
                     >
-                      {task.title}
+                      <p className="truncate w-full h-full">{task.title}</p>
                       <i className="fa-solid fa-hourglass-half ml-auto text-[18px] text-[#e9d1a6]"></i>
                     </div>
                   );

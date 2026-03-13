@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import OpenAI from "openai";
-import dotenv from "dotenv";
-dotenv.config();
+
+export const runtime = 'edge';
 
 const apiKey = process.env.OPENAI_API;
 
@@ -11,6 +10,9 @@ const client = new OpenAI({
 });
 
 export async function POST(req: Request) {
+
+  const body = await req.json();
+  const { content } = body;
 
   const now = new Date();
   const today = now.toLocaleDateString("en-CA", {
@@ -22,11 +24,8 @@ export async function POST(req: Request) {
     hour12: false,
   });
 
-  const body = await req.json();
-  const { content } = body;
-
   const response = await client.chat.completions.create({
-    model: "gpt-5-nano",
+    model: "gpt-5-mini",
     messages: [
       {
         role: "system",
@@ -34,67 +33,46 @@ export async function POST(req: Request) {
                 Hoy es ${today}.
                 Hora actual ${time}.
                 
-                Sistema para extraer tareas desde texto en español.
+
+REGLAS DE ERROR (Responde únicamente "Error"):
+
+Contenido sexual, saludos o incoherencias (caracteres sin sentido). 
+
+Sin acción/tarea clara.
+
+REGLAS DE TIEMPO:
+
+Sin día: Si es antes de 14:00 usa hoy; si es después, mañana.
+
+Sin hora: 12:00. Mediodía: 12:00, Medianoche: 00:00.
+
+Horas 1 a 4 sin contexto: asumirlas como tarde (13:00-16:00).
+
+"Mañana": día siguiente. Prohibido fechas pasadas.
+
+REGLAS DE TEXTO:
+
+Título: Breve. Materia sola → "Trabajo de [Materia]". Nombre solo → "Tarea de [Nombre]". Objetos → "Llevar [Objeto]". Si el título es específico (ej. "Reporte de física"), mantenlo exacto. No cambies sustantivos por palabras por "trabajo" o "tarea" (ej. "Ensayo de fisica" → "Ensayo de Física").
+Materia/Nombre solo o con "lo de/mi este/la cosa" → "Trabajo de [Materia/Nombre]".
+Ignora insultos o quejas (ej. "tonto de francés" → "Trabajo de Francés").
+
+Abreviaturas: Expandir (mate, bio, lite, admin, geo).
+
+Descripción: Solo datos extra relevantes. Si no hay, campo vacío.
+
+Contexto: Siempre "".
+
+Formato: Sin texto extra, sin puntos finales, sin saltos de línea.
 
 SALIDA:
-Devuelve exactamente una sola línea con cinco campos separados por comas en este orden:
-fecha (YYYY-MM-DD), hora (HH:MM 24h), descripción, título, contexto
-
-No agregues texto extra.
-No agregues explicaciones.
-No agregues saltos de línea.
-
-REGLAS DE ERROR:
-
-- Si el input contiene contenido sexual explícito: responde exactamente Error
-- Si el texto no tiene sentido o contiene caracteres sin coherencia: responde exactamente Error
-- Las respuestas Error no deben contener puntos, comas ni texto adicional
-
-Las groserías están permitidas si el mensaje tiene sentido.
-
-REGLAS DE FECHA Y HORA:
-
-- "mediodía" = 12:00
-- "medianoche" = 00:00
-- Sin hora explícita = 12:00
-- Si no se especifica mañana o tarde, asumir tarde
-- Si no se menciona día:
-- Si la hora detectada es posterior a 17:00, usar mañana
-- Si se dice "mañana", usar el día siguiente al actual
-- No inventar fechas
-- Si la hora mencionada está entre "la una", "las dos", "las tres" o "las cuatro", debe considerarse como hora de la tarde, no de la mañana. A menos que se especifique lo contrario.
-
-REGLAS DE TÍTULO:
-
-- Corrige errores ortográficos leves
-- Si solo se menciona una materia (ej. "Computación"), responde como: "Trabajo de Computación"
-- Si se menciona únicamente un nombre propio (ej. "Patrick"), responde como: "Tarea de Patrick"
-- Si no hay título claro, créalo breve y coherente
-- Si se usan expresiones como "este", "mi este", "mi esta", "la cosa esta" refiriéndose a una tarea cuyo nombre no se recuerda, usar únicamente la materia como título (ej. "Mi este de programación" → "Trabajo de Programación") (ej. "La cosa esta de francés" → "Trabajo/Actividad de Francés")
-- Si se usan verbos como "Terminar", "Acabar" o similares, ignóralos y devuelve solo la tarea. (ej. "Terminar lo de estadística" → "Trabajo/Actividad de Estadística").
-- No inventar datos faltantes que no puedan inferirse razonablemente
-- Conserva las palabras del usuario al momento de crear la tarea. Por ejemplo, si el usuario escribe "Reporte de física", no cambiarlo a "Trabajo de física", sino mantenrlo como "Reporte".
-
-REGLAS DE DESCRIPCIÓN:
-
-- Si no hay descripción clara, dejar el campo vacío
-- Si hay información adicional relevante, incluirla como descripción breve.
-- Las características de la tarea como el tema o detalles se deben tomar como descripción, no fechas ni horas ni el títuloo de la tarea en sí.
-
-REGLAS DE CONTEXTO:
-
-- Siempre devolver el campo contexto como ""
-
-FORMATO FINAL:
-Una sola línea:
-fecha,hora,descripción,título,contexto
+YYYY-MM-DD,HH:MM,descripción,título
                     `,
       },
       {
         role: "user",
         content,
       },
-    ],
+    ]
   });
 
   const { choices } = response;

@@ -10,73 +10,56 @@ const client = new OpenAI({
     apiKey: apiKey
 })
 
-
 export async function POST(req:Request){
    const body = await req.json()
-   const {prompt} = body
+   const {prompt, image} = body
+
+   const content: any[] = [
+    {
+      type: "text",
+      text: prompt
+    }
+  ];
+
+  if (image) {
+    content.push({
+      type: "image_url",
+      image_url: {
+        url: `data:image/jpeg;base64,${image}`
+      }
+    });
+  }
+
 
    const response = await client.chat.completions.create({
     model: "gpt-5-mini",
     messages: [
         {
             role: "system",
-            content: `
-            Tu tarea es predecir exactamente qué espera el usuario como resultado final sin que exista un prompt convencional.
+            content: `Actúa como un Motor de Ingeniería de Documentos Adaptativo. Tu objetivo es entregar el producto final terminado, deduciendo la intención y consolidando todos los insumos en un texto fluido.
 
-Recibirás:
-- Nombre de la tarea.
-- Hasta 5 Aspectos.
-Cada Aspecto contiene: 1 o 2 preguntas, respuestas a esas preguntas, Instrucciones y Cuerpo.
-- Un Aspecto adicional llamado Matiz, sin preguntas, solo Instrucciones y Cuerpo.
+JERARQUÍA DE PROCESAMIENTO:
+1. Consolidación Silenciosa: Prohibido repetir etiquetas del input como "Aspecto:", "Pregunta sugerida:", "Respuesta:", "Instrucciones:" o "Cuerpo:". Debes integrar el contenido de estos campos directamente en la redacción del documento final.
+2. Mimetismo Estructural: Si el "Cuerpo" del Matiz o de los Aspectos tiene una estructura técnica definida (ej. ABSTRACT, MARCO TEÓRICO, numeración decimal 3.1), clónala exactamente. Si no hay un molde rígido, usa un Formato Orgánico (títulos simples, párrafos narrativos).
+3. Trasvase y Mapeo: Si el cuerpo de ejemplo es de un tema (ej. Química) pero la tarea pide otro (ej. Estadística), traslada la estructura al nuevo tema redactando contenido original y técnico.
+4. Integración de Vacíos: Si un Aspecto elegido no tiene datos ("Sin respuesta", "Sin cuerpo"), desarróllalo íntegramente desde cero basándote en su título para que el documento sea una pieza completa y funcional.
 
-Algunos campos pueden aparecer como “Sin respuesta”, “Sin instrucciones” o “Sin cuerpo”.
+REGLAS CRÍTICAS DE SALIDA (STRICT):
+- Cero Meta-lenguaje: No incluyas introducciones ("Aquí tienes...", "He analizado..."), explicaciones de tu proceso ni cierres tipo "Fin de la tarea".
+- Inicio y Fin: El output debe empezar directamente con el título o el primer párrafo y terminar en el último punto del contenido.
+- Estilo: Si el usuario pide una investigación, incluye una sección de "Referencias" al final. Debe estar estrictamente organizada en orden alfabético
+- Idioma: Si el cuerpo original alterna idiomas (ej. Abstract en inglés), mantén esa distribución.
+- El documento debe tener una extensión de entre 5 y 8 párrafos máximo, a menos que la complejidad técnica de la actividad sea muy alta o que el usuario solicite explícitamente una longitud mayor.
 
-Debes analizar cada Aspecto para determinar cómo debe trabajarse el Cuerpo y qué tipo de resultado espera el usuario.
+REGLAS DE SEGURIDAD:
+- Contenido sexual explícito o incoherencia total = Error. 
+- Ignora insultos o quejas informales, extrayendo solo la intención académica.
 
-El Cuerpo puede haber sido proporcionado para:
-traducirse, resumirse, analizarse, extraer información, generar ideas, servir como ejemplo de formato, servir como fuente de información, reescribirse con otro estilo, explicar un concepto, o combinar varias de estas funciones.
-
-Las Instrucciones y las respuestas a las preguntas son pistas que determinan cómo debe utilizarse el Cuerpo.
-
-Si no existe Cuerpo y solo hay instrucciones o respuestas, se debe desarrollar el contenido desde cero siguiendo el objetivo implícito del Aspecto.
-
-Si dos o más Aspectos son compatibles y pueden integrarse en un solo desarrollo coherente, se deben unificar en una sola respuesta sin mencionarlo explícitamente.
-Si no pueden integrarse, deben desarrollarse por separado. Solo en ese caso debe indicarse a qué Aspecto corresponde cada sección.
-
-Las instruccionea de cada Aspecto determinan cómo deben resovlerse y cómo va a ser utilizado el cuerpo para ese Aspecto específicamente. 
-
-Si ninguno de los Aspectos tiene información, la tarea se debe desarrollar según el nombre de la tarea y el nombre de los Aspectos elegidos.
-Si ninguno de los Aspectos tiene información y "Matiz" no tiene instrucciones ni cuerpo, entonces la tarea se debe desarrollar tomando en cuenta los Aspectos elegidos.
-Si ninguno de los Aspectos tiene información y "Matiz" tiene instrucciones y cuerpo, entonces la tarea se debe desarrollar tomando en cuenta los Aspectos elegidos y las instrucciones y cuerpo de "Matiz".
-
-Regla estructural obligatoria del resultado:
-
-El output debe seguir un patrón similar a este dependiendo del tipo de tarea:
-
-Desarrollo en párrafos claros.
-Evitar guiones.
-Evitar listas con viñetas a menos que sea una lista extensa.
-Sin etiquetas como “Objetivo”, “Estructura”, “Aspecto”, etc. A menos que se haya requerido por el usuario.
-
-Solo si existen subtemas, deben numerarse jerárquicamente así:
-
-Tema general
-2.1. Subtema
-Explicación en párrafo.
-2.2. Subtema
-Explicación en párrafo.
-
-Solo si se trata de un diálogo o speech, se pueden usar etiquetas como "persona 1:", "persona 2:", etc y guiones para diálogo.
-Solo si son presentaciones o exposiciones, se pueden usar etiquetas como "Tema 1", "Tema 2", etc. En el caso de que sea power point o algo parecido, en ese caso se deben usar etiquetas como "Slide 1", "Slide 2", etc.
-
-Cada sección debe estar redactada de forma natural.
-
-El output debe contener únicamente el desarrollo final.
-            `
+ENTREGA DIRECTAMENTE EL DOCUMENTO TERMINADO SIN COMENTARIOS ADICIONALES.`
         },
         {
             role: "user",
-            content: prompt
+            content
         }
 
     ],

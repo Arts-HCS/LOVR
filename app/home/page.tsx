@@ -110,6 +110,8 @@ export default function Home() {
 
   useEffect(() => {
     getSavedTasks();
+    setTasksGeneradas([]);
+    
   }, [activeUser]);
 
   const handleChange = (id: string, text: string, index: number) => {
@@ -135,7 +137,6 @@ export default function Home() {
   const abortControllers = useRef<Record<string, AbortController>>({});
 
   const handleKeyDown = async (e: any, id: string) => {
-    // --- LÓGICA DE ABORTO (Si presionas Backspace y hay una petición activa) ---
     if (e.key === "Backspace") {
       if (abortControllers.current[id]) {
         // 1. Abortamos la petición de red inmediatamente
@@ -147,98 +148,87 @@ export default function Home() {
         setTasks((prev) =>
           prev.map((task) => (task.id === id ? { ...task, status: 5 } : task))
         );
-        console.log("Petición anulada por el usuario");
       }
     }
 
     if (e.key === "Enter") {
       e.preventDefault();
       e.currentTarget.blur();
-
+    
       const nextInput = inputRefs.current[inputRefs.current.length - 1];
       if (nextInput) nextInput.focus();
-
-      const task = tasks.find((task) => task.id === id);
+    
+      const task = tasks.find((t) => t.id === id);
       if (!task) return;
-
+    
       const { content } = task;
-      if (content.startsWith("8")) return;
-
-      // --- INICIO DE PETICIÓN CON CONTROLADOR ---
-
-      // Si ya había uno por alguna razón, lo cancelamos antes de empezar
+      if (content.startsWith("8") || content.length < 2) return;
+    
+      // --- CONTROLADOR DE ABORTO ---
       if (abortControllers.current[id]) abortControllers.current[id].abort();
-
-      // Creamos el nuevo controlador para esta tarea
       const controller = new AbortController();
       abortControllers.current[id] = controller;
-
+    
+      // Estado inicial: Cargando
       setTasks((prev) =>
-        prev.map((task) => (task.id === id ? { ...task, status: 1 } : task))
+        prev.map((t) => (t.id === id ? { ...t, status: 1 } : t))
       );
-
-      try {
-        // Petición de Opciones (Fetch 1)
-        const taskOptions = await fetch("/api/createTaskOptions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          signal: controller.signal, // VINCULADO
-          body: JSON.stringify({ taskTitle: content }),
+    
+      // --- PETICIÓN 1: CREAR TAREA (Prioridad) ---
+      fetch("/api/createTask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({ content }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          const answer = data.answer.split(",");
+          const [date, time, desc, title] = [answer[0], answer[1], answer[2], answer[3]];
+    
+          if (date === "Error") {
+            setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status: 2 } : t)));
+          } else {
+            // ACTUALIZAMOS SOLO LOS DATOS DE LA TAREA
+            setTasks((prev) =>
+              prev.map((t) =>
+                t.id === id ? { ...t, date, time, desc, title, status: 3 } : t
+              )
+            );
+          }
+        })
+        .catch((err) => {
+          if (err.name !== "AbortError") {
+            console.error("Error en createTask:", err);
+            setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status: 2 } : t)));
+          }
         });
-
-        const options = await taskOptions.json();
-        const parsed = JSON.parse(options);
-
-        setTasks((prev) =>
-          prev.map((task) =>
-            task.id === id ? { ...task, context: parsed } : task
-          )
-        );
-
-        // Petición de Creación (Fetch 2)
-        const data = await fetch("/api/createTask", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          signal: controller.signal, // VINCULADO
-          body: JSON.stringify({ content }),
-        });
-
-        const resp = await data.json();
-
-        // Si llegamos aquí con éxito, eliminamos el controlador de la lista de "activos"
-        delete abortControllers.current[id];
-
-        const answer = resp.answer.split(",");
-        const [date, time, desc, title] = [
-          answer[0],
-          answer[1],
-          answer[2],
-          answer[3],
-        ];
-
-        if (date === "Error") {
+    
+      // --- PETICIÓN 2: OPCIONES (Segundo plano) ---
+      fetch("/api/createTaskOptions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({ taskTitle: content }),
+      })
+        .then((res) => res.json())
+        .then((optionsRaw) => {
+          const parsedOptions = JSON.parse(optionsRaw);
+          
+          // ACTUALIZAMOS SOLO EL CONTEXTO (sin tocar el status ni la fecha)
           setTasks((prev) =>
-            prev.map((task) => (task.id === id ? { ...task, status: 2 } : task))
+            prev.map((t) =>
+              t.id === id ? { ...t, context: parsedOptions } : t
+            )
           );
-          return;
-        }
-
-        setTasks((prev) =>
-          prev.map((task) =>
-            task.id === id
-              ? { ...task, date, time, desc, title, status: 3 }
-              : task
-          )
-        );
-      } catch (error: any) {
-        // Manejamos el caso de que la petición fuera abortada
-        if (error.name === "AbortError") {
-          console.warn("La operación fue detenida intencionalmente.");
-          return; // Salimos de la función sin actualizar a status de éxito
-        }
-        console.error("Error en la petición:", error);
-        delete abortControllers.current[id];
-      }
+        })
+        .catch((err) => {
+          if (err.name !== "AbortError") console.error("Error en options:", err);
+        })
+        .finally(() => {
+          // Limpiamos el controlador solo al final de todo
+          delete abortControllers.current[id];
+        });
     }
 
     // --- LÓGICA RESTANTE DE TECLAS ---
@@ -320,6 +310,18 @@ export default function Home() {
       setHeartSectionActive(false);
     }
   }, [active.length]);
+
+
+  // Tasks generadas que se guarden 
+  
+  interface TaskGenerada {
+    taskID: string;
+    status: number;
+    title: string;
+    generated: string;
+  }
+
+  const [tasksGeneradas, setTasksGeneradas] = useState<TaskGenerada[]>([]);
 
   return (
     <main className="bg-[#202225] flex items-start justify-start w-full max-h-screen h-screen overflow-hidden">
@@ -403,6 +405,8 @@ export default function Home() {
               activeUser={activeUser}
               savedTasks={savedTasks}
               setSavedTasks={setSavedTasks}
+              setTasksGeneradas={setTasksGeneradas}
+              tasksGeneradas={tasksGeneradas}
             />
           )}
           {active.length === 1 && active.includes(3) && (

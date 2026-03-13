@@ -1,27 +1,46 @@
 import { useEffect, useState } from "react";
 
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const result = reader.result as string;
+      const base64 = result.split(",")[1];
+
+      resolve(base64);
+    };
+
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function TaskContext({
   task,
   tasksAnswers,
   setTasksAnswers,
   setTasksGeneradas,
-  tasksGeneradas,
-  setSelectedTask
+  setSelectedTask,
+  setSavedTasks,
+  IDsGenerados
 }: {
   task: any;
   tasksAnswers: any;
   setTasksAnswers: (value: any) => void;
   setTasksGeneradas: (value: any) => void;
-  tasksGeneradas: any;
   setSelectedTask: (value: any) => void;
+  setSavedTasks: (value: any) => void;
+  IDsGenerados: number[]
 }) {
   let receivedID = null;
   if (task.baseID) {
     receivedID = task.baseID;
   } else receivedID = task.id;
 
-  // Opciones de 0 a 4
+  if (IDsGenerados.includes(receivedID)) return 
 
+  // Opciones de 0 a 4
   const { opciones } = task.context;
 
   const [taskMenu, setTaskMenu] = useState<any>(null);
@@ -29,9 +48,13 @@ export default function TaskContext({
 
   const [opcionesElegidas, setOpcionesElegidas] = useState<number[]>([]);
 
-  useEffect(()=>{
-    setOpcionesElegidas([])
-  }, [opciones])
+  useEffect(() => {
+    setOpcionesElegidas([]);
+  }, [opciones]);
+
+  // foto prompt
+  const [file, setFile] = useState<File | null>(null);
+  const [document, setDocument] = useState<File | null>(null);
 
   // Generated Answer
 
@@ -50,8 +73,7 @@ export default function TaskContext({
   };
 
   const handleSaveTask = () => {
-
-    if (opcionesElegidas.length === 0) {
+    if (opcionesElegidas.length === 0 && file === null) {
       setOpcionesElegidas((prev: number[]) => [...prev, 1, 2, 3, 4, 5, 6]);
       return;
     }
@@ -75,28 +97,45 @@ export default function TaskContext({
         const data = respuestasPorOpcion[i] || {};
         const instructions = data.thirdInput || "";
         const body = data.fourthInput || "";
-        
-        respuesta += `Instrucciones: ${instructions.length > 5 ? instructions : "Sin instrucciones"}. `;
 
+        respuesta += `Instrucciones: ${
+          instructions.length > 5 ? instructions : "Sin instrucciones"
+        }. `;
       } else {
         respuesta += `Aspecto: ${nombresDeOpciones[i - 1]}. `;
-      
+
         // Extraemos con valores por defecto para evitar el error de 'undefined'
         const currentResp = respuestasPorOpcion?.[i] || {};
         const firstInput = currentResp.firstInput || "";
         const secondInput = currentResp.secondInput || "";
         const thirdInput = currentResp.thirdInput || "";
         const fourthInput = currentResp.fourthInput || "";
-      
+
         if (camposPorOpcion[i - 1].length === 1) {
-          respuesta += `Pregunta sugerida: "${camposPorOpcion[i - 1][0]}. Respuesta: ${firstInput.length > 2 ? firstInput : "Sin respuesta"}. `;
+          respuesta += `Pregunta sugerida: "${
+            camposPorOpcion[i - 1][0]
+          }. Respuesta: ${
+            firstInput.length > 2 ? firstInput : "Sin respuesta"
+          }. `;
         } else {
-          respuesta += `Pregunta sugerida 1: "${camposPorOpcion[i - 1][0]}. Respuesta: ${firstInput.length > 2 ? firstInput : "Sin respuesta"}. `;
-          respuesta += `Pregunta sugerida 2: "${camposPorOpcion[i - 1][1]}. Respuesta: ${secondInput.length > 2 ? secondInput : "Sin respuesta"}. `;
+          respuesta += `Pregunta sugerida 1: "${
+            camposPorOpcion[i - 1][0]
+          }. Respuesta: ${
+            firstInput.length > 2 ? firstInput : "Sin respuesta"
+          }. `;
+          respuesta += `Pregunta sugerida 2: "${
+            camposPorOpcion[i - 1][1]
+          }. Respuesta: ${
+            secondInput.length > 2 ? secondInput : "Sin respuesta"
+          }. `;
         }
-      
-        respuesta += `Instrucciones: ${thirdInput.length > 2 ? thirdInput : "Sin instrucciones"}. `;
-        respuesta += `Cuerpo: ${fourthInput.length > 2 ? fourthInput : "Sin cuerpo"}. `;
+
+        respuesta += `Instrucciones: ${
+          thirdInput.length > 2 ? thirdInput : "Sin instrucciones"
+        }. `;
+        respuesta += `Cuerpo: ${
+          fourthInput.length > 2 ? fourthInput : "Sin cuerpo"
+        }. `;
       }
 
       respuestas.push(respuesta);
@@ -104,46 +143,65 @@ export default function TaskContext({
 
     let prompt = respuestas.join(" \n");
 
-    const generateAnswer = async (prompt:string) =>{
-      setTasksGeneradas((prev:any)=>(
-        [...prev, {
+    const generateAnswer = async (prompt: string) => {
+      setTasksGeneradas((prev: any) => [
+        ...prev,
+        {
           id: receivedID,
           status: 0,
           title: task.title,
-          generated: ""
-        }]
-      ))
+          generated: "",
+        },
+      ]);
+      let base64 = "";
+      if (file) {
+        base64 = await fileToBase64(file);
+      }
+
       const responseGenerate = await fetch("/api/generateTaskContent", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({prompt})
+        body: JSON.stringify({
+          prompt,
+          image: base64,
+        }),
       });
-      const dataGenerated = await responseGenerate.json()
-      const {answer} = dataGenerated
+      const dataGenerated = await responseGenerate.json();
+      const { answer } = dataGenerated;
 
-      setTasksGeneradas((prev:any)=>{
-        return prev.map((prevTask:any) => prevTask.id === receivedID ? {...prevTask, status: 1, generated: answer}: prevTask)
-      })
+      setTasksGeneradas((prev: any) => {
+        return prev.map((task: any) =>
+          task.id === receivedID
+            ? {
+                ...task,
+                status: 1,
+                generated: answer,
+              }
+            : task
+        );
+      });
 
+      const controller = new AbortController();
 
       const saveResponse = await fetch("/api/saveGenerated", {
         method: "POST",
+        signal: controller.signal,
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           baseID: receivedID,
-          generated: answer
-        })
+          generated: answer,
+        }),
       });
-      const finalresp = await saveResponse.json()
-    }
+      const finalresp = await saveResponse.json();
+    };
 
-    setSelectedTask(null)
+    setSelectedTask(null);
 
-    generateAnswer(prompt)
+    generateAnswer(prompt);
   };
 
   return (
@@ -168,7 +226,10 @@ export default function TaskContext({
                       setTaskMenu(null);
                       setTaskSelected(null);
                     }
-                    if (!opcionesElegidas.includes(parseInt(option.id)) && !(taskSelected === option.id)) {
+                    if (
+                      !opcionesElegidas.includes(parseInt(option.id)) &&
+                      !(taskSelected === option.id)
+                    ) {
                       setOpcionesElegidas((prev) => [
                         ...prev,
                         parseInt(option.id),
@@ -222,10 +283,7 @@ export default function TaskContext({
                 }
 
                 if (!opcionesElegidas.includes(6) && !(taskSelected === 6)) {
-                  setOpcionesElegidas((prev) => [
-                    ...prev,
-                    6
-                  ]);
+                  setOpcionesElegidas((prev) => [...prev, 6]);
                 } else {
                   setOpcionesElegidas((prev) =>
                     prev.filter((id: number) => id != 6)
@@ -316,7 +374,7 @@ export default function TaskContext({
                 const currentTaskGroup = prev[receivedID] || {};
                 // Obtenemos lo que existe para esta opción (ej. la 6) o un objeto vacío
                 const currentSelection = currentTaskGroup[taskSelected] || {};
-            
+
                 return {
                   ...prev,
                   [receivedID]: {
@@ -354,15 +412,49 @@ export default function TaskContext({
           ></textarea>
         </form>
       )}
+      <div>
+        <form className="w-full p-4 rounded-2xl bg-[#2D272C] mt-3">
+          <label
+            htmlFor="file"
+            className="text-[18.5px] font-medium cursor-pointer"
+          >
+            Adjuntar foto
+          </label>
+          <input
+            className="cursor-pointer mt-2 p-2 border border-[#a9737f4b] rounded-lg text-[#dbd9ddde] bg-[#211c1f65] w-full"
+            type="file"
+            id="file"
+            accept="image/*"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+          />
+
+          <label
+            htmlFor="document"
+            className="text-[18.5px] font-medium cursor-pointer mt-4 block"
+          >
+            Adjuntar archivo
+          </label>
+          <input
+            className="cursor-pointer mt-2 p-2 border border-[#a9737f4b] rounded-lg text-[#dbd9ddde] bg-[#211c1f65] w-full"
+            type="file"
+            id="document"
+            accept=".pdf,.doc,.docx,.txt"
+            onChange={(e) => setDocument(e.target.files?.[0] || null)}
+          />
+        </form>
+      </div>
+
       <div className="w-full h-fit flex items-start justify-start mt-5 gap-3">
         <button
           className="w-[85%] min-h-10 text-(--black-color) bg-[#C7C4C8] cursor-pointer rounded flex items-center justify-center hover:scale-95 transition-all text-[17px]"
           onClick={() => handleSaveTask()}
         >
-          {opcionesElegidas.length === 0
+          {opcionesElegidas.length === 0 && file === null && document === null
             ? "Agregar todas las opciones"
-            : opcionesElegidas.length >= 1 &&
-            "Resolver"}
+            : opcionesElegidas.length === 0 &&
+              (file !== null || document !== null)
+            ? "Subir contenido"
+            : opcionesElegidas.length >= 1 && "Resolver"}
           <i className="fa-solid fa-arrow-up transfrom rotate-45 ml-1"></i>
         </button>
 
