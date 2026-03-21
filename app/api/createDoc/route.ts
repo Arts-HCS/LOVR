@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 const oauth2Client = new google.auth.OAuth2(
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  "postmessage"
+  process.env.GOOGLE_REDIRECT_URI,
 );
 
 export async function POST(req: Request) {
@@ -13,32 +13,32 @@ export async function POST(req: Request) {
     const { code, title, content, format } = await req.json();
     
     const cookieStore = await cookies(); 
-    let refreshToken = cookieStore.get("google_refresh_token")?.value;
+    let refreshToken = process.env.GOOGLE_REFRESH_TOKEN || cookieStore.get("google_refresh_token")?.value;
 
-    if (code) {
+    if (!refreshToken && code) {
       const { tokens } = await oauth2Client.getToken(code);
       if (tokens.refresh_token) {
         refreshToken = tokens.refresh_token;
         
-        // Guardar el refresh_token de forma asíncrona
         cookieStore.set("google_refresh_token", refreshToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          maxAge: 60 * 60 * 24 * 30,
+          maxAge: 60 * 60 * 24 * 30, // 30 días
           path: "/",
         });
       }
     }
 
-    // 2. Verificar si tenemos el token para proceder
     if (!refreshToken) {
       return NextResponse.json({ needsLogin: true }, { status: 401 });
     }
 
-    // 3. Autenticar y llamar a la API de Docs
+    // 4. CONFIGURAR CREDENCIALES
     oauth2Client.setCredentials({ refresh_token: refreshToken });
+    
     const docs = google.docs({ version: "v1", auth: oauth2Client });
 
+    // 5. CREAR DOCUMENTO
     const createRes = await docs.documents.create({
       requestBody: { title },
     });
@@ -323,8 +323,9 @@ export async function POST(req: Request) {
                   }, 
                   paragraphStyle: {
                     alignment: "JUSTIFIED",
+                    lineSpacing: 150,
                   },
-                  fields: "alignment"
+                  fields: "alignment,lineSpacing"
                 }
               },
             ]

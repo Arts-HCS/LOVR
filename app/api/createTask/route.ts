@@ -54,13 +54,15 @@ REGLAS DE TEXTO:
 
 Título: Breve. Materia sola → "Trabajo de [Materia]". Nombre solo → "Tarea de [Nombre]". Objetos → "Llevar [Objeto]". Si el título es específico (ej. "Reporte de física"), mantenlo exacto. No cambies sustantivos por palabras por "trabajo" o "tarea" (ej. "Ensayo de fisica" → "Ensayo de Física").
 Materia/Nombre solo o con "lo de/mi este/la cosa" → "Trabajo de [Materia/Nombre]".
+Conserva la estructura de materia (ej. "Práctica de Física" → "Práctica de Física").
 Ignora insultos o quejas (ej. "tonto de francés" → "Trabajo de Francés").
+Frases como "hacer notas" se tomarán como el título tal cual, sin forzar la estructura de materia.
+Corrige errores de ortografía y gramática.
+Primera letra y nombres propios en mayúscula siempre.
 
 Abreviaturas: Expandir (mate, bio, lite, admin, geo).
 
 Descripción: Solo datos extra relevantes. Si no hay, campo vacío.
-
-Contexto: Siempre "".
 
 Formato: Sin texto extra, sin puntos finales, sin saltos de línea.
 

@@ -23,7 +23,7 @@ export default function TaskContext({
   setTasksGeneradas,
   setSelectedTask,
   setSavedTasks,
-  IDsGenerados
+  IDsGenerados,
 }: {
   task: any;
   tasksAnswers: any;
@@ -31,14 +31,14 @@ export default function TaskContext({
   setTasksGeneradas: (value: any) => void;
   setSelectedTask: (value: any) => void;
   setSavedTasks: (value: any) => void;
-  IDsGenerados: number[]
+  IDsGenerados: number[];
 }) {
   let receivedID = null;
   if (task.baseID) {
     receivedID = task.baseID;
   } else receivedID = task.id;
 
-  if (IDsGenerados.includes(receivedID)) return 
+  if (IDsGenerados.includes(receivedID)) return;
 
   // Opciones de 0 a 4
   const { opciones } = task.context;
@@ -52,12 +52,10 @@ export default function TaskContext({
     setOpcionesElegidas([]);
   }, [opciones]);
 
-  // foto prompt
-  const [file, setFile] = useState<File | null>(null);
-  const [document, setDocument] = useState<File | null>(null);
+  // CAMBIO: Ahora manejamos un arreglo de archivos
+  const [files, setFiles] = useState<File[]>([]);
 
   // Generated Answer
-
   const handleSelectTask = (id: string) => {
     if (id === "matiz") {
       setTaskMenu("matiz");
@@ -73,7 +71,8 @@ export default function TaskContext({
   };
 
   const handleSaveTask = () => {
-    if (opcionesElegidas.length === 0 && file === null) {
+    // CAMBIO: Validamos contra el length de files
+    if (opcionesElegidas.length === 0 && files.length === 0) {
       setOpcionesElegidas((prev: number[]) => [...prev, 1, 2, 3, 4, 5, 6]);
       return;
     }
@@ -99,12 +98,14 @@ export default function TaskContext({
         const body = data.fourthInput || "";
 
         respuesta += `Instrucciones: ${
-          instructions.length > 5 ? instructions : "Sin instrucciones"
+          instructions.length > 3 ? instructions : "Sin instrucciones"
+        }. `;
+        respuesta += `\nCuerpo: ${
+          body.length > 3 ? body : "Sin cuerpo"
         }. `;
       } else {
         respuesta += `Aspecto: ${nombresDeOpciones[i - 1]}. `;
 
-        // Extraemos con valores por defecto para evitar el error de 'undefined'
         const currentResp = respuestasPorOpcion?.[i] || {};
         const firstInput = currentResp.firstInput || "";
         const secondInput = currentResp.secondInput || "";
@@ -142,6 +143,7 @@ export default function TaskContext({
     }
 
     let prompt = respuestas.join(" \n");
+    console.log(prompt);
 
     const generateAnswer = async (prompt: string) => {
       setTasksGeneradas((prev: any) => [
@@ -153,9 +155,11 @@ export default function TaskContext({
           generated: "",
         },
       ]);
-      let base64 = "";
-      if (file) {
-        base64 = await fileToBase64(file);
+      
+      // CAMBIO: Convertimos todos los archivos a base64
+      let base64Array: string[] = [];
+      if (files.length > 0) {
+        base64Array = await Promise.all(files.map((file) => fileToBase64(file)));
       }
 
       const responseGenerate = await fetch("/api/generateTaskContent", {
@@ -165,7 +169,7 @@ export default function TaskContext({
         },
         body: JSON.stringify({
           prompt,
-          image: base64,
+          images: base64Array, // CAMBIO: Enviamos 'images' (arreglo) en vez de 'image' (string)
         }),
       });
       const dataGenerated = await responseGenerate.json();
@@ -296,7 +300,7 @@ export default function TaskContext({
                   : "bg-[#eceaeccd] hover:bg-[#704c8081] hover:text-[#e2d1d5de]"
               }   transition-all duration-200 hover:shadow-[0_4px_30px_rgba(0,0,0,0.15)] cursor-pointer text-[17px] text-(--black-color) text-left`}
             >
-              Matiz
+              Personalizado
             </button>
             <button
               className={`transition-all h-10 w-11 flex items-center justify-center text-[18px] transform cursor-pointer rounded-xl hover:bg-[#262225] ${
@@ -370,9 +374,7 @@ export default function TaskContext({
             value={tasksAnswers[receivedID]?.[taskSelected]?.thirdInput || ""}
             onChange={(e) => {
               setTasksAnswers((prev: any) => {
-                // Obtenemos lo que ya existe para este ID o un objeto vacío
                 const currentTaskGroup = prev[receivedID] || {};
-                // Obtenemos lo que existe para esta opción (ej. la 6) o un objeto vacío
                 const currentSelection = currentTaskGroup[taskSelected] || {};
 
                 return {
@@ -389,7 +391,7 @@ export default function TaskContext({
             }}
           ></textarea>
           <label className="text-[16.5px]" htmlFor="body">
-            Cuerpo
+            Contexto
           </label>
           <textarea
             className="mt-1 w-full h-20 outline-none border border-[#efecec2c] text-[#dbd9ddde] text-[15px] shadow-[0_4px_10px_rgba(0,0,0,0.15)] rounded-lg p-2 bg-[#1c1e2185] resize-none focus:h-45 hover:h-24 transition-all duration-350"
@@ -418,29 +420,28 @@ export default function TaskContext({
             htmlFor="file"
             className="text-[18.5px] font-medium cursor-pointer"
           >
-            Adjuntar foto
+            Adjuntar foto(s)
           </label>
+          {/* CAMBIO: Se agregó "multiple" y se modificó el onChange para aceptar múltiples archivos */}
           <input
             className="cursor-pointer mt-2 p-2 border border-[#a9737f4b] rounded-lg text-[#dbd9ddde] bg-[#211c1f65] w-full"
             type="file"
             id="file"
-            accept="image/*"
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            multiple // Permite seleccionar múltiples archivos
+            accept="image/png, image/jpeg, image/gif, image/jpg, image/webp"
+            onChange={(e) => {
+              if (e.target.files) {
+                // Convertimos el FileList a un arreglo tradicional de JavaScript
+                setFiles(Array.from(e.target.files));
+              }
+            }}
           />
-
-          <label
-            htmlFor="document"
-            className="text-[18.5px] font-medium cursor-pointer mt-4 block"
-          >
-            Adjuntar archivo
-          </label>
-          <input
-            className="cursor-pointer mt-2 p-2 border border-[#a9737f4b] rounded-lg text-[#dbd9ddde] bg-[#211c1f65] w-full"
-            type="file"
-            id="document"
-            accept=".pdf,.doc,.docx,.txt"
-            onChange={(e) => setDocument(e.target.files?.[0] || null)}
-          />
+          {/* Opcional: Mostrar la cantidad de imágenes seleccionadas */}
+          {files.length > 0 && (
+            <p className="text-sm mt-2 text-[#dbd9ddde]">
+              {files.length} imagen(es) seleccionada(s)
+            </p>
+          )}
         </form>
       </div>
 
@@ -449,10 +450,10 @@ export default function TaskContext({
           className="w-[85%] min-h-10 text-(--black-color) bg-[#C7C4C8] cursor-pointer rounded flex items-center justify-center hover:scale-95 transition-all text-[17px]"
           onClick={() => handleSaveTask()}
         >
-          {opcionesElegidas.length === 0 && file === null && document === null
+          {/* CAMBIO: Ajuste de la lógica de los botones para el arreglo "files" */}
+          {opcionesElegidas.length === 0 && files.length === 0 
             ? "Agregar todas las opciones"
-            : opcionesElegidas.length === 0 &&
-              (file !== null || document !== null)
+            : opcionesElegidas.length === 0 && files.length > 0
             ? "Subir contenido"
             : opcionesElegidas.length >= 1 && "Resolver"}
           <i className="fa-solid fa-arrow-up transfrom rotate-45 ml-1"></i>

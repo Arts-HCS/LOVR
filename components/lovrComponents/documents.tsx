@@ -1,6 +1,4 @@
-import { get } from "http";
-import { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Documents({
   setActiveDocuments,
@@ -11,134 +9,162 @@ export default function Documents({
   activeDocuments: boolean;
   activeUser: any;
 }) {
+  const [newDocs, setNewDocs] = useState<any>([{ id: Date.now(), content: "" }]);
 
-    const [newDocs, setNewDocs] = useState<any>([
-        {
-            id: Date.now(),
-            content: ""
-        }
-    ]);
-
-    useEffect(()=>{
-        const last = newDocs[newDocs.length -1]
-        if (last && last.content.length > 5){
-            setNewDocs(
-                [...newDocs, {
-                    id: Date.now(),
-                    content: ""
-                }]
-            )
-        }
-
-    }, [newDocs])
+  useEffect(() => {
+    const last = newDocs[newDocs.length - 1];
+    if (last && last.content.length > 5) {
+      setNewDocs([...newDocs, { id: Date.now(), content: "" }]);
+    }
+  }, [newDocs]);
 
   const [respDocs, setRespDocs] = useState<any>([]);
 
   const getDocs = async () => {
     const data = await fetch("/api/getSavedDocuments", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userID: activeUser.id,
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userID: activeUser.id }),
     });
-    const resp = await data.json();
-    return resp;
+    return await data.json();
   };
 
   useEffect(() => {
-    const docs = getDocs();
-    docs.then((data) => {
-      setRespDocs(data);
-    });
+    getDocs().then((data) => setRespDocs(data));
   }, []);
 
+  const saveDocuments = async () => {
+    const allowedDocs = newDocs
+      .filter((doc: any) => doc.content.split(" ").length > 100)
+      .map((doc: any) => doc.content.trim());
 
-    //   FUNCIONES PARA GUARDAR LOS DOCUMENTOS
+    await fetch("/api/docSend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userID: activeUser.id, content: allowedDocs }),
+    });
+  };
 
-    const saveDocuments = async () => {
-        const allowedDocs = newDocs.filter((doc:any)=> doc.content.split(" ").length > 100).map((doc:any) => doc.content)
+  const deleteDocument = async (e: any, id: number) => {
+    e.preventDefault();
+    await fetch("/api/deleteDocument", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userID: activeUser.id, id }),
+    });
+    setActiveDocuments(false);
+  };
 
-
-        const data = await fetch("/api/docSend", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                userID: activeUser.id,
-                content: allowedDocs
-            })
-        })
-        const resp = await data.json()
-    }
+  const formatDate = (iso: string) => {
+    const [y, m, d] = iso.split("T")[0].split("-");
+    return `${d}/${m}/${y}`;
+  };
 
   return (
     <div
       className={`h-full ${
         activeDocuments ? "w-140" : "w-0"
-      } transition-all duration-1000 absolute top-0 right-0 bg-[#211c1f] z-100 border-l border-[#7D7D81] shadow-2xl p-8 flex flex-col items-tart justify-start  overflow-scroll`}
+      } transition-all duration-1000 absolute top-0 right-0 bg-[#211c1f] z-100 border-l border-[#7D7D81] shadow-2xl flex flex-col overflow-hidden`}
     >
-      <button
-        onClick={() =>{
-            saveDocuments()
-            setActiveDocuments(false)
-        }}
-        className="absolute top-3 right-3 w-fit px-2 text-[17px] rounded h-9 flex items-center justify-center bg-[#3d3439] cursor-pointer"
-      >
-        Guardar y salir
-        <i className="fa-solid fa-chevron-right text-(--white-color)"></i>
-      </button>
-      <h5 className="text-3xl text-(--white-color) mb-3">Tus documentos</h5>
-      {respDocs.length === 0 && (
-        <p className="text-[#bebebe] text-xl">No tienes documentos guardados</p>
-      )}
-      {respDocs.length > 0 && (
-        <form className="mt-2 flex flex-col items-start justify-start">
-          {respDocs.map((doc: any, index: number) => {
-            return (
-              <div className="w-full h-full flex flex-col items-start justify-start" key={index}>
-                <label className="text-[#BEBEBE]" htmlFor={doc.id}>
-                  Documento {index + 1}
-                </label>
+      {/* ── Header ── */}
+      <div className="flex-shrink-0 flex items-center justify-between px-8 pt-8 pb-5 border-b border-[#7d7d8140]">
+        <div>
+          <h5 className="text-3xl text-(--white-color) font-semibold tracking-tight">
+            Tus documentos
+          </h5>
+          <p className="text-[13px] text-[#7D7D81] mt-1 tracking-widest uppercase">
+            Muestras de escritura guardadas
+          </p>
+        </div>
+
+        <button
+          onClick={() => {
+            saveDocuments();
+            setActiveDocuments(false);
+          }}
+          className="flex items-center gap-2 text-[14px] text-(--white-color) px-4 py-2 rounded-md bg-[#3d3439] border border-[#7d7d8140] hover:border-[#A87580] hover:bg-[#4a3d42] transition-all duration-200 cursor-pointer"
+        >
+          Guardar y salir
+          <i className="fa-solid fa-chevron-right text-[12px]" />
+        </button>
+      </div>
+
+      {/* ── Contenido scrolleable ── */}
+      <div className="flex-1 overflow-y-auto px-8 py-5 flex flex-col">
+
+        {/* Documentos guardados */}
+        {respDocs.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-3 opacity-40 py-12">
+            <i className="fa-regular fa-folder-open text-[40px] text-[#A87580]" />
+            <p className="text-[15px] text-[#DCD9DE]">No tienes documentos guardados</p>
+          </div>
+        ) : (
+          <form className="flex flex-col gap-y-5">
+            {respDocs.map((doc: any, index: number) => (
+              <div
+                key={index}
+                className="w-full flex flex-col rounded-md border border-[#7d7d8130] bg-[#a875800d] hover:border-[#7d7d8160] transition-all duration-200 px-5 py-4 gap-2"
+              >
+                <div className="flex items-center justify-between">
+                  <label
+                    className="text-[13px] text-[#A87580] font-semibold uppercase tracking-widest"
+                    htmlFor={doc.id}
+                  >
+                    Documento {index + 1}
+                  </label>
+                  {doc.createdAt && (
+                    <span className="text-[12px] text-[#7D7D81]">
+                      {formatDate(doc.createdAt)}
+                    </span>
+                  )}
+                </div>
+
                 <textarea
                   id={doc.id}
                   readOnly
                   onChange={(e) =>
                     setRespDocs(
                       respDocs.map((docR: any) =>
-                        doc.id === docR.id
-                          ? { ...docR, content: e.target.value }
-                          : docR
+                        doc.id === docR.id ? { ...docR, content: e.target.value } : docR
                       )
                     )
                   }
                   value={doc.content}
-                  className="w-full h-30 rounded border border-[#7D7D81] text-[#BEBEBE] shadow-2xs resize-none p-2 text-justify mt-3 mb-1 outline-none focus:border-[#9d7880] focus:border-2 hover:h-40 focus:h-78 transition-all duration-300"
+                  className="w-full h-24 rounded-md border border-[#7d7d8150] text-[#BEBEBE] bg-[#2a2227] resize-none p-3 text-justify outline-none focus:border-[#A87580] focus:border-2 hover:h-36 focus:h-72 transition-all duration-300 text-[14px] leading-relaxed"
                 />
-                {doc.createdAt && (
-                    <p className="ml-auto text-[#bebebe] text-[16px]">
-                    {doc.createdAt.split("T")[0].split("-")[2]}/
-                    {doc.createdAt.split("T")[0].split("-")[1]}/
-                    {doc.createdAt.split("T")[0].split("-")[0]}
-                  </p>
-                )}
-                
-              </div>
-            );
-          })}
-        </form>
-      )}
 
-    <h5 className="text-2xl text-(--white-color) mt-10 mb-2">Agregar documentos</h5>
-    <p className="text-[#bebebe] text-[16px]">Los documentos deben contener al menos 100 palabras y no ser demsasiado parecidos entre sí.</p>
-      <form className="mt-2 flex flex-col items-start justify-start gap-6">
-        {newDocs.map((newD: any, index: number) => {
-          return (
-            <div className="w-full h-full flex flex-col items-start justify-start" key={index}>
-              <label className="text-[#d9d7d7]" htmlFor={newD.id}>
+                <button
+                  className="self-start flex items-center gap-2 text-[13px] py-1.5 px-4 rounded-md bg-[#3d3439] border border-[#7d7d8140] hover:border-[#A87580] text-[#DCD9DE] transition-all duration-200 cursor-pointer"
+                  onClick={(e) => deleteDocument(e, doc.id)}
+                >
+                  Eliminar documento
+                  <i className="fa-solid fa-file-circle-minus text-[#A87580]" />
+                </button>
+              </div>
+            ))}
+          </form>
+        )}
+
+        {/* Agregar documentos */}
+        <div className="mt-10 mb-2">
+          <h5 className="text-2xl text-(--white-color) font-semibold tracking-tight">
+            Agregar documentos
+          </h5>
+          <p className="text-[13px] text-[#7D7D81] mt-1">
+            Los documentos deben contener al menos 100 palabras y no ser demasiado parecidos entre sí.
+          </p>
+        </div>
+
+        <form className="flex flex-col gap-y-4">
+          {newDocs.map((newD: any, index: number) => (
+            <div
+              key={index}
+              className="w-full flex flex-col rounded-md border border-[#7d7d8130] bg-[#a875800d] hover:border-[#7d7d8160] transition-all duration-200 px-5 py-4 gap-2"
+            >
+              <label
+                className="text-[13px] text-[#A87580] font-semibold uppercase tracking-widest"
+                htmlFor={newD.id}
+              >
                 Documento {index + 1}
               </label>
               <textarea
@@ -146,19 +172,17 @@ export default function Documents({
                 onChange={(e) =>
                   setNewDocs(
                     newDocs.map((docR: any) =>
-                      newD.id === docR.id
-                        ? { ...docR, content: e.target.value }
-                        : docR
+                      newD.id === docR.id ? { ...docR, content: e.target.value } : docR
                     )
                   )
                 }
                 value={newD.content}
-                className="w-full h-20 rounded border border-[#7D7D81] text-[#BEBEBE] shadow-2xs resize-none p-2 text-justify mt-3 mb-1 outline-none focus:border-[#9d7880] focus:border-2 hover:h-30 focus:h-78 transition-all duration-300 focus:bg-[#262224]"
+                className="w-full h-20 rounded-md border border-[#7d7d8150] text-[#BEBEBE] bg-transparent resize-none p-3 text-justify outline-none focus:border-[#A87580] focus:border-2 hover:h-28 focus:h-72 focus:bg-[#262224] transition-all duration-300 text-[14px] leading-relaxed"
               />
             </div>
-          );
-        })}
-      </form>
+          ))}
+        </form>
+      </div>
     </div>
   );
 }

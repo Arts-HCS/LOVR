@@ -108,10 +108,14 @@ export default function Home() {
     setSavedTasks(resp);
   }
 
+  const prevActiveUserRef = useRef(activeUser);
+
   useEffect(() => {
-    getSavedTasks();
-    setTasksGeneradas([]);
-    
+    if (prevActiveUserRef.current?.id !== activeUser?.id) {
+      getSavedTasks();
+      setTasksGeneradas([]);
+      prevActiveUserRef.current = activeUser;
+    }
   }, [activeUser]);
 
   const handleChange = (id: string, text: string, index: number) => {
@@ -267,19 +271,17 @@ export default function Home() {
   };
 
   // USE STATES PARA LOS BOTONES DEL LADO DERECHO
-  const icons = ["fa-file-pen", "fa-calendar", "fa-list-check", "fa-dna"];
+  const icons = ["fa-house", "fa-calendar", "fa-list-check", "fa-dna"];
 
-  const [active, setActive] = useState<number[]>([0, 1]);
+  const [active, setActive] = useState<number | null>(0);
 
   function toggleButton(index: number) {
     setActive((prev) => {
-      if (prev.includes(index)) return prev.filter((i) => i !== index);
+      if (prev == index){
+        return null
+      }  
 
-      if (prev.length >= 3) {
-        return prev;
-      }
-
-      return [...prev, index];
+      return index;
     });
   }
 
@@ -303,13 +305,13 @@ export default function Home() {
 
   const [heartSectionActive, setHeartSectionActive] = useState(false);
 
-  useEffect(() => {
-    if (active.length === 1 && active.includes(4)) {
-      setHeartSectionActive(true);
-    } else {
-      setHeartSectionActive(false);
-    }
-  }, [active.length]);
+  // useEffect(() => {
+  //   if (active.length === 1 && active.includes(4)) {
+  //     setHeartSectionActive(true);
+  //   } else {
+  //     setHeartSectionActive(false);
+  //   }
+  // }, [active.length]);
 
 
   // Tasks generadas que se guarden 
@@ -364,7 +366,7 @@ export default function Home() {
                 key={i}
                 onClick={() => toggleButton(i)}
                 className={`side-button ${
-                  active.includes(i) ? "button-active" : ""
+                  active == i ? "button-active" : ""
                 }`}
               >
                 <i className={`fa-solid ${icon}`}></i>
@@ -384,20 +386,43 @@ export default function Home() {
             </div>
           </div>
 
-          {active.length === 1 && active.includes(0) && (
+          {active === null && (
+            <BigWritingComponent
+            tasks={tasks}
+            setTasks={setTasks}
+            handleChange={handleChange}
+            handleKeyDown={handleKeyDown}
+            inputRefs={inputRefs}
+            active={active}
+            setActive={setActive}
+          />
+          )}
+
+          {active === 0 && (
+            <div className="flex flex-col items-start justify-start h-full w-full ">
             <BigWritingComponent
               tasks={tasks}
               setTasks={setTasks}
               handleChange={handleChange}
               handleKeyDown={handleKeyDown}
               inputRefs={inputRefs}
+              active={active}
               setActive={setActive}
             />
+            <BigCalendarComponent
+              active={active}
+              setActive={setActive}
+              tasks={tasks}
+              savedTasks={savedTasks}
+            />
+          </div>
           )}
-          {active.length === 1 && active.includes(1) && (
+
+          {active === 1 && (
             <BigCalendarComponent tasks={tasks} savedTasks={savedTasks} />
           )}
-          {active.length === 1 && active.includes(2) && (
+
+          {active === 2 && (
             <BigTasksComponent
               tasks={tasks}
               setTasks={setTasks}
@@ -409,53 +434,11 @@ export default function Home() {
               tasksGeneradas={tasksGeneradas}
             />
           )}
-          {active.length === 1 && active.includes(3) && (
-            <BigHeartComponent activeUser={activeUser} />
+          {active === 3 && (
+            <BigHeartComponent activeUser={activeUser} setActiveUser={setActiveUser} />
           )}
 
-          {/* De dos -------- */}
-
-          {active.length === 2 && active.includes(0) && active.includes(1) && (
-            <div className="flex flex-col items-start justify-start h-full w-full ">
-              <BigWritingComponent
-                tasks={tasks}
-                setTasks={setTasks}
-                handleChange={handleChange}
-                handleKeyDown={handleKeyDown}
-                inputRefs={inputRefs}
-                active={active}
-                setActive={setActive}
-              />
-              <BigCalendarComponent
-                active={active}
-                setActive={setActive}
-                tasks={tasks}
-                savedTasks={savedTasks}
-              />
-            </div>
-          )}
-
-          {active.length === 2 && active.includes(0) && active.includes(2) && (
-            <div className="flex items-start justify-start h-full w-full ">
-              <BigWritingComponent
-                tasks={tasks}
-                setTasks={setTasks}
-                handleChange={handleChange}
-                handleKeyDown={handleKeyDown}
-                inputRefs={inputRefs}
-                active={active}
-                setActive={setActive}
-              />
-              <BigTasksComponent
-              tasks={tasks}
-              setTasks={setTasks}
-              setActive={setActive}
-              activeUser={activeUser}
-              savedTasks={savedTasks}
-              setSavedTasks={setSavedTasks}
-            />
-            </div>
-          )}
+         
         </div>
       </div>
     </main>

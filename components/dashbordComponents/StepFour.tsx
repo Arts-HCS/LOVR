@@ -124,11 +124,13 @@ export default function StepFour({
   onNext,
   onBack,
   activeUser,
+  setStepFourCompleted
 }: {
   setStep: (step: number) => void;
   onNext: () => void;
   onBack: () => void;
   activeUser: any;
+  setStepFourCompleted: (active: boolean) => void
 }) {
   const [sendVerification, setSendVerification] = useState(false);
 
@@ -195,6 +197,7 @@ export default function StepFour({
 
     setAllowedTexts(allowedTexts);
     setSendVerification(true);
+    setStepFourCompleted(true)
 
   };
 
@@ -374,7 +377,7 @@ export default function StepFour({
             className={`w-40 h-10 text-[#e4dfe0] bg-[#363434] cursor-pointer rounded flex items-center justify-center mt-3 hover:scale-95 transition-all`}
             onClick={() => setStep(2)}
           >
-            Volver
+            Regresar
           </button>
         </div>
       )}

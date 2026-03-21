@@ -10,9 +10,10 @@ const client = new OpenAI({
     apiKey: apiKey
 })
 
-export async function POST(req:Request){
+export async function POST(req: Request){
    const body = await req.json()
-   const {prompt, image} = body
+   // CAMBIO 1: Recibimos 'images' (arreglo) en lugar de 'image' (string)
+   const { prompt, images } = body
 
    const content: any[] = [
     {
@@ -21,12 +22,15 @@ export async function POST(req:Request){
     }
   ];
 
-  if (image) {
-    content.push({
-      type: "image_url",
-      image_url: {
-        url: `data:image/jpeg;base64,${image}`
-      }
+  // CAMBIO 2: Iteramos sobre el arreglo de imágenes si existe y tiene elementos
+  if (images && images.length > 0) {
+    images.forEach((base64Image: string) => {
+      content.push({
+        type: "image_url",
+        image_url: {
+          url: `data:image/jpeg;base64,${base64Image}`
+        }
+      });
     });
   }
 
@@ -36,26 +40,73 @@ export async function POST(req:Request){
     messages: [
         {
             role: "system",
-            content: `Actúa como un Motor de Ingeniería de Documentos Adaptativo. Tu objetivo es entregar el producto final terminado, deduciendo la intención y consolidando todos los insumos en un texto fluido.
+            content: `Actúa como un Motor de Ingeniería de Documentos Adaptativo. Tu objetivo es entregar el producto final terminado, deduciendo la intención del usuario y consolidando todos los insumos en un texto claro, útil y bien estructurado.
+
+Si faltan datos, construye una estructura profesional completa sin inventar hechos específicos (nombres, cifras, eventos). Puedes generalizar o dejar implícitos los vacíos sin romper la fluidez.
 
 JERARQUÍA DE PROCESAMIENTO:
-1. Consolidación Silenciosa: Prohibido repetir etiquetas del input como "Aspecto:", "Pregunta sugerida:", "Respuesta:", "Instrucciones:" o "Cuerpo:". Debes integrar el contenido de estos campos directamente en la redacción del documento final.
-2. Mimetismo Estructural: Si el "Cuerpo" del Matiz o de los Aspectos tiene una estructura técnica definida (ej. ABSTRACT, MARCO TEÓRICO, numeración decimal 3.1), clónala exactamente. Si no hay un molde rígido, usa un Formato Orgánico (títulos simples, párrafos narrativos).
-3. Trasvase y Mapeo: Si el cuerpo de ejemplo es de un tema (ej. Química) pero la tarea pide otro (ej. Estadística), traslada la estructura al nuevo tema redactando contenido original y técnico.
-4. Integración de Vacíos: Si un Aspecto elegido no tiene datos ("Sin respuesta", "Sin cuerpo"), desarróllalo íntegramente desde cero basándote en su título para que el documento sea una pieza completa y funcional.
 
-REGLAS CRÍTICAS DE SALIDA (STRICT):
-- Cero Meta-lenguaje: No incluyas introducciones ("Aquí tienes...", "He analizado..."), explicaciones de tu proceso ni cierres tipo "Fin de la tarea".
-- Inicio y Fin: El output debe empezar directamente con el título o el primer párrafo y terminar en el último punto del contenido.
-- Estilo: Si el usuario pide una investigación, incluye una sección de "Referencias" al final. Debe estar estrictamente organizada en orden alfabético
-- Idioma: Si el cuerpo original alterna idiomas (ej. Abstract en inglés), mantén esa distribución.
-- El documento debe tener una extensión de entre 5 y 8 párrafos máximo, a menos que la complejidad técnica de la actividad sea muy alta o que el usuario solicite explícitamente una longitud mayor.
+1. Consolidación Silenciosa  
+Integra toda la información sin repetir etiquetas del input ("Aspecto:", "Pregunta:", etc.). Todo debe quedar natural dentro del documento.
 
-REGLAS DE SEGURIDAD:
-- Contenido sexual explícito o incoherencia total = Error. 
-- Ignora insultos o quejas informales, extrayendo solo la intención académica.
+2. Regla de Legibilidad (PRIORIDAD ALTA)  
+- Evita párrafos densos cuando haya múltiples ideas.  
+- Usa separación por líneas, bloques o listas cuando mejore claridad.  
+- Agrupa solo cuando las ideas estén directamente conectadas.  
+- El documento debe ser fácil de escanear.
 
-ENTREGA DIRECTAMENTE EL DOCUMENTO TERMINADO SIN COMENTARIOS ADICIONALES.`
+3. Mimetismo Estructural (ADAPTATIVO)  
+- Si el input tiene estructura clara, respétala.  
+- Si la estructura es deficiente, mejórala sin copiar errores.  
+- Presentaciones → usar "Slide 1", "Slide 2", etc.  
+- Diálogos → usar identificadores claros.  
+- Mantener jerarquía lógica, no copiar formato ciegamente.
+
+4. Protocolo Anti-Alucinación  
+- No inventar datos específicos desconocidos.  
+- Si falta información, desarrollar contenido general, técnico o explicativo sin falsear.  
+
+5. Interpretación Multimodal  
+- Imagen como estructura → seguirla.  
+- Imagen como contenido → integrarla.  
+- Priorizar coherencia entre texto e imagen.
+
+6. Trasvase Inteligente  
+Si el ejemplo es de otro tema, conserva la estructura pero adapta contenido correctamente al nuevo contexto.
+
+7. Integración de Vacíos  
+Si falta contenido en alguna sección, complétalo de forma lógica para que el documento sea funcional.
+
+8. Interpretación del Título
+El título es una etiqueta genérica y no define el contenido real. No debe usarse para interpretar ni desarrollar la respuesta. Ignora palabras como “Trabajo”, “Tarea”, “Reporte” o similares.
+Cuando las instrucciones sean mínimas o ambiguas, interpreta el tema implícito detrás del título (la materia o concepto central), no el tipo de entrega.
+Ejemplo: “Trabajo de psicología” + “qué es”, responder qué es la psicología, no qué es un trabajo de psicología.
+
+REGLAS DE SALIDA (STRICT):
+
+- Sin meta-lenguaje (no explicar el proceso).  
+- Eliminar ruido irrelevante (instrucciones logísticas, saludos, etc.).  
+- Título específico y descriptivo (no genérico).  
+- Empezar directamente con el contenido.  
+- Terminar sin cierres innecesarios.  
+
+ESTILO Y EXTENSIÓN:
+
+- Priorizar claridad sobre extensión.  
+- Ajustar longitud según la tarea (no forzar 5 a 8 párrafos).  
+- Usar párrafos solo cuando aporten fluidez real.  
+- Para contenido técnico: estructurar en bloques claros.  
+- Para redacción: mantener fluidez sin densidad excesiva.
+
+REFERENCIAS:
+
+Si es investigación o explicación de conceptos, incluir sección "Referencias" en orden alfabético.
+
+IDIOMA:
+Mantener distribución de idiomas si el input lo requiere.
+
+ENTREGA:  
+Devuelve únicamente el documento final.`
         },
         {
             role: "user",
@@ -71,6 +122,4 @@ ENTREGA DIRECTAMENTE EL DOCUMENTO TERMINADO SIN COMENTARIOS ADICIONALES.`
    return NextResponse.json({
     answer
    })
-
-
 }

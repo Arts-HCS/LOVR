@@ -44,7 +44,7 @@ export default function BigWritingComponent(
                                         <p className={`text-[16px] font-normal ${(content.trim() === ""  && index !== 0) ? " text-[#dcd9de6a]" : "text-[#DCD9DE]"}`}>{index+1}</p>
                                         <input 
                                             className={`border-b p-2 ml-3 text-[#dcd9dee3] outline-none w-full pr-7 text-[17.5px] ${(content.trim() === ""  && index !== 0) ? " border-[#9797975e]" : " border-[#979797]"}`}
-                                            placeholder={`${index === 0 ? "¿Qué hay por hacer?" : ""}`}
+                                            placeholder={`${index === 0 ? "¿Qué hay que hacer?" : ""}`}
                                             value={content}
                                             onChange={(e)=> handleChange(id, e.target.value, index)}
                                             onKeyDown={(e)=> handleKeyDown(e, id)}
@@ -67,7 +67,7 @@ export default function BigWritingComponent(
                                             ${(content.trim() === ""  && index !== 0) ? " opacity-10" : " opacity-100 cursor-pointer"}
                                             
                                             `}
-                                            onClick={() => setActive([2])}
+                                            onClick={() => setActive(2)}
                                         >      
 
                                         {status === 0 && <i className="fa-solid fa-paperclip"></i>}

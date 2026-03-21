@@ -7,9 +7,11 @@ interface Props {
   content: string;
   type: "doc" | "slide";
   format?: "apa" | "mla";
+  slidesContent?: any;
+  slidesVersion?: any;
 }
 
-function ExportButton({ title, content, type, format }: Props) {
+function ExportButton({ title, content, type, format, slidesVersion }: Props) {
   const endpoint = type === "doc" ? "/api/createDoc" : "/api/createSlides";
 
   const handleExport = async (code?: string) => {
@@ -36,8 +38,12 @@ function ExportButton({ title, content, type, format }: Props) {
   return (
     <button
       onClick={() => handleExport()}
-      className={`px-4 py-2 rounded-md text-left text-white font-medium cursor-pointer transition-all duration-400 ${
-        type === "doc" ? "bg-[#4285F4] hover:bg-[#426bf4]" : "bg-[#F4B400] hover:bg-[#f4a300]"
+      className={`px-4 py-2 rounded-md text-left text-white text-[15.5px] font-medium cursor-pointer transition-all duration-400 
+        
+        ${
+        type === "doc" ? "bg-[#4285F4] hover:bg-[#426bf4]" : 
+        slidesVersion ? "bg-[#F4B400] hover:bg-[#f4a300]" : "bg-[#76746d] hover:bg-[#43423e] cursor-default"
+        
       }`}
     >
       {type === "doc" && format === "apa" ? 
@@ -63,14 +69,14 @@ function ExportButton({ title, content, type, format }: Props) {
   );
 }
 
-export default function ExportGroup({ title, content }: { title: string; content: string }) {
+export default function ExportGroup({ title, content, slidesContent, slidesVersion }: { title: string; content: string; slidesContent?: any, slidesVersion?: any }) {
   return (
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
       <div className="flex flex-col gap-2">
         <ExportButton title={title} content={content} type="doc" />
         <ExportButton title={title} content={content} type="doc" format="apa" />
         <ExportButton title={title} content={content} type="doc" format="mla" />
-        <ExportButton title={title} content={content} type="slide" />
+        <ExportButton title={title} content={slidesContent} type="slide" slidesVersion={slidesVersion} />
         
       </div>
     </GoogleOAuthProvider>

@@ -8,33 +8,37 @@ datasource db {
 }
 
 model Usuario {
-  id        String  @id @default(cuid())
-  name      String  @unique
-  apodo     String?
-  email     String  @unique
-  gender    String?
-  password  String
-  modelName String?
+  id         String  @id @default(cuid())
+  name       String  @unique
+  apodo      String?
+  email      String  @unique
+  gender     String?
+  password   String
+  modelName  String?
+  modelRules String?
+  modelID    String?
 
-  createdAt DateTime @default(now())
-  Tarea     Tarea[]
-  Docs      Docs[]
+  createdAt     DateTime        @default(now())
+  Tarea         Tarea[]
+  Docs          Docs[]
+  StyleRulebook StyleRulebook[]
 }
 
 model Tarea {
-  id        Int      @id @default(autoincrement())
-  userId    String
-  title     String
-  hour      String
-  day       Int
-  month     Int
-  year      Int
-  desc      String?
-  baseID    String   @unique
-  context   Json
-  generated String?
-  number    Int?
-  createdAt DateTime @default(now())
+  id              Int      @id @default(autoincrement())
+  userId          String
+  title           String
+  hour            String
+  day             Int
+  month           Int
+  year            Int
+  desc            String?
+  baseID          String   @unique
+  context         Json
+  generated       String?
+  lovrGenerated   String?
+  slidesGenerated Json?
+  createdAt       DateTime @default(now())
 
   relationUser Usuario @relation(fields: [userId], references: [id])
 }
@@ -47,4 +51,17 @@ model Docs {
   createdAt DateTime @default(now())
 
   relationUser Usuario @relation(fields: [userID], references: [id])
+}
+
+model StyleRulebook {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  label     String
+  modelUsed String
+  modelID   String   @unique @default(cuid())
+  rules     String
+  desc      String?
+  createdAt DateTime @default(now())
+
+  relationUser Usuario @relation(fields: [userId], references: [id])
 }

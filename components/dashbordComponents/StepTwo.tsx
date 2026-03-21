@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-function StepTwo({ onNext, onBack, activeUser, setStep }: { onNext: () => void, onBack: () => void, activeUser: any, setStep: (step: number) => void }) {
+function StepTwo({ onNext, onBack, activeUser, setStep, stepFourCompleted }: { onNext: () => void, onBack: () => void, activeUser: any, setStep: (step: number) => void, stepFourCompleted: boolean }) {
 
   const [modelName, setModelName] = useState("");
 
@@ -78,20 +78,32 @@ function StepTwo({ onNext, onBack, activeUser, setStep }: { onNext: () => void, 
                 type="text" 
               />
               <span className={`ml-4 text-[16px] rounded text-(--white-color) bg-[#4F4346] ${modelError === 0 ? "p-0" : "p-3"} `}>
-                {modelError === 1 ? "Debes ingresar un nombre" : modelError === 2 ? "El nombre debe tener al menos 3 caracteres" : modelError === 3 ? "No se permiten carácteres especiales" : ""}
+                {modelError === 1 ? "Debes ingresar un nombre para continuar" : modelError === 2 ? "El nombre debe tener al menos 3 caracteres" : modelError === 3 ? "No se permiten carácteres especiales" : ""}
               </span>
             </div>
             
 
             <p className={`text-[17px] text-[#bebebe] w-[80%] mt-4`}>Tu modelo de LOVR necesita conocer tu estilo de escritura para comenzar a aprender de él. <br /> Puedes decidir entre compartir textos que hayas escrito antes, escribir uno corto en este momento, o hacer ambas cosas. Entre más compartas tu estilo, más rápido aprenderá tu LOVR. Si estás {activeUser.gender === "M" ? "lista" : "listo"} para hacerlo, continúa presionando el botón de "Iniciar configuración".         
             </p>
-            <button 
+            {
+              !stepFourCompleted ? (
+                <button 
               className={`w-45 h-10 bg-[#bbb8b9] text-(--black-color) text-[17px] font-medium rounded flex items-center justify-center mt-2 hover:scale-95 transition-all cursor-pointer`}
               onClick={()=> setStep(4)}
               >
                   Iniciar configuración</button>
 
-            <p className={`text-[17px] text-[#bebebe] w-[80%] mt-14`}>Si no te sientes {activeUser.gender === "M" ? "lista" : "listo"} en este momento para escribir ni compartir textos, ¡no hay problema! Puedes continuar con la configuración por defecto y explorar el menú principal de LOVR, ¡ahí podrás personalizarlo cuando lo desees!</p>
+              ) : (
+                <p className="text-[18px] py-1 px-2 rounded-sm bg-[#4F3A3F] shadow-2xs">
+                  La configuración ha sido guardada
+                </p>
+              )
+            }
+            
+
+            <p className={`text-[17px] text-[#bebebe] w-[80%] ${
+              stepFourCompleted ? "mt-3" : !"mt-14"
+            }`}>Si no te sientes {activeUser.gender === "M" ? "lista" : "listo"} en este momento para escribir ni compartir textos, ¡no hay problema! Puedes continuar con la configuración por defecto y explorar el menú principal de LOVR, ¡ahí podrás personalizarlo cuando lo desees!</p>
 
           </form>
         <div className="w-full mt-auto flex items-center justify-end gap-5">

@@ -119,7 +119,7 @@ export default function BigCalendarComponent({ active, tasks, setActive, savedTa
             <div
               key={i}
               className={` ${task.length ===3 ? "bg-[#4b8056]":"bg-[#595FB1]"} text-[#040404] rounded px-2 py-1.5 text-[17px] w-full flex items-center justify-start cursor-pointer`}
-              onClick={()=> setActive([2])}
+              onClick={()=> setActive(2)}
             >
               <p className="w-full flex">
                 <span className="mr-2 truncate">{task[0]}</span> <span className="ml-auto ">{task[1]}</span>

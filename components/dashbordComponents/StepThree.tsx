@@ -8,7 +8,7 @@ function StepThree({
   onNext: () => void;
   onBack: () => void;
   activeUser: any;
-  setLoverCreated: (active: boolean) => void
+  setLoverCreated: (active: boolean) => void;
 }) {
   return (
     <div className="w-full h-full flex flex-col items-start justify-start mt-5 p-4">

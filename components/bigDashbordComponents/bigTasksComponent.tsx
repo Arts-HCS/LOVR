@@ -14,10 +14,7 @@ type Props = {
   tasksGeneradas?: any
 };
 
-function formatearFecha(fechaTexto?: string) {
-  if (!fechaTexto) return "";
-
-  const [year, month, day] = fechaTexto.split("-").map(Number);
+function formatearFecha(year: number, month: number, day: number) {
   const fecha = new Date(year, month - 1, day);
 
   if (isNaN(fecha.getTime())) return "";
@@ -111,7 +108,6 @@ export default function WritingComponent({
 
   const handleDeleteSavedTasks = async (baseID: string) => {
 
-    
     const resp = await fetch("/api/deleteSavedTask", {
       method: "POST",
       headers: {
@@ -174,7 +170,6 @@ export default function WritingComponent({
   // Viewed task. La tarea vista en la derecha de las tareas generadas
   const [viewedTask, setViewedTask] = useState<any>(null);
 
-
   return (
     <section className="h-185 w-full flex items-start justify-start pl-8 pr-0 py-0 pb-0 bg-[#191a1c7d] overflow-scroll ">
       <div className="flex-1 mt-8 mr-8">
@@ -184,7 +179,7 @@ export default function WritingComponent({
           </h3>
           <button
             className="text-xl w-10 h-10 text-(--white-color) bg-[#3b3b3c] flex items-center justify-center rounded cursor-pointer"
-            onClick={() => setActive([0, 1])}
+            onClick={() => setActive(0)}
           >
             <i className="fa-solid fa-angle-up"></i>
           </button>
@@ -214,6 +209,8 @@ export default function WritingComponent({
             )}
             {tasks.map((task: any, index: number) => {
               if (!task.title) return;
+
+              let [year, month, day] = task.date.split("-");
 
               return (
                 <div
@@ -258,7 +255,6 @@ export default function WritingComponent({
                       className="answer-btn"
                       onClick= {()=>{
                         setActiveRightBar(true)
-                        setViewedTask(task)
                       }}
                       >
                       <i className="fa-solid fa-check"></i>
@@ -266,7 +262,7 @@ export default function WritingComponent({
                   )}
 
                   <div>
-                    <h5>{formatearFecha(task.date)}</h5>
+                    <h5>{formatearFecha(year, month, day)}</h5>
                   </div>
                   <h4>{task.title}</h4>
                   <p>{task.desc}</p>
@@ -276,6 +272,10 @@ export default function WritingComponent({
 
             {savedTasks.length > 0 &&
               savedTasks.map((task: any, index: number) => {
+                let year = task.year
+                let month = task.month
+                let day = task.day
+
                 return (
                   <div
                     key={index}
@@ -312,7 +312,6 @@ export default function WritingComponent({
                         className="answer-btn"
                         onClick= {()=>{
                           setActiveRightBar(true)
-                          setViewedTask(task)
                         }}
                       >
                         <i className="fa-solid fa-check"></i>
@@ -320,7 +319,7 @@ export default function WritingComponent({
                     )}
 
                     <div>
-                      <h5>{formatearFecha(task.createdAt.slice(0, 10))}</h5>
+                      <h5>{formatearFecha(year, month, day)}</h5>
                     </div>
                     <h4>{task.title}</h4>
                     <p>{task.desc}</p>
@@ -400,6 +399,7 @@ export default function WritingComponent({
 
             viewedTask={viewedTask}
             setViewedTask={setViewedTask}
+            activeUser={activeUser}
           
             ></GeneratedTaskView> 
 
