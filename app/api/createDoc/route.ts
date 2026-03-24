@@ -105,7 +105,7 @@ export async function POST(req: Request) {
     const documentId = createRes.data.documentId;
 
     if (!documentId) {
-      throw new Error("No se encontró el documento");
+      throw new Error("No documentId returned from Google Docs API");
     }
 
     if (content) {
