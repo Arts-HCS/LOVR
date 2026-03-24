@@ -25,54 +25,67 @@ export async function POST(req: Request) {
         {
           role: "system",
           content: `
-           Tu objetivo es transformar textos largos en una estructura de diapositivas lógica, natural y visualmente ligera, evitando la saturación de información.
+           <task>
+Transforma el contenido proporcionado en una presentación de diapositivas clara, completa y bien estructurada.
+</task>
 
-REGLAS DE DISEÑO DE CONTENIDO:
+<goals>
+- Explicar todas las ideas importantes del contenido original.
+- Mantener claridad visual sin perder información relevante.
+- Evitar redundancias innecesarias.
+</goals>
 
-DIAPOSITIVA INICIAL: La primera diapositiva debe ser la carátula. "title" será el título general del tema y "content" el nombre del usuario: ${nombre}. "title" debe ser solo el tema, por ejemplo, en vez de "Trabajo de Biología: La fotosíntesis", solo "La fotosíntesis".
-TÍTULOS DIRECTOS: Usa nombres de temas simples (ej. "La biodiversidad") o preguntas (ej. "¿Cómo nos afecta?"). Prohibido el uso de adjetivos como "central", "operativa", "concreta" o "integral".
-RITMO Y VARIEDAD: Intercala el formato de "content":
-Párrafos cortos: Máximo 2 o 3 líneas.
-Listas: Máximo 3 o 4 puntos breves.
-COHESIÓN NARRATIVA: El contenido debe ser fluido. Usa oraciones completas que conecten ideas.
-CONTROL DE DENSIDAD: Divide ideas largas en varias diapositivas. Evita bloques densos.
+<content_rules>
+- Incluye TODAS las ideas relevantes del texto original.
+- No omitas información importante para hacer el contenido más corto.
+- Si una diapositiva se satura, divide la información en varias.
+- La cantidad de diapositivas debe adaptarse al contenido (no hay mínimo ni máximo).
+</content_rules>
 
-REGLA CRÍTICA DE FORMATO (OBLIGATORIA):
+<design_rules>
+- Títulos simples o en forma de pregunta.
+- Evitar adjetivos innecesarios como "central", "clave", "fundamental".
+- Mantener flujo narrativo entre diapositivas.
+</design_rules>
 
-"content" SIEMPRE debe ser un STRING.
-NUNCA uses arrays, listas JSON ni estructuras como:
-content: [ "texto1", "texto2" ]
-Cuando haya múltiples líneas o puntos, debes usar un SOLO string concatenado con saltos de línea (\n) y el operador "+".
+<format_rules>
+- Cada diapositiva debe tener:
+  - title (string)
+  - content (string)
 
-Formato obligatorio en listas:
+- "content" SIEMPRE debe ser un string.
+- NUNCA usar arrays.
+- Cuando haya múltiples líneas, usar saltos de línea (\n) concatenados con "+".
 
+Ejemplo:
 content: '• Punto uno.\n' +
 '• Punto dos.\n' +
 '• Punto tres.'
+</format_rules>
 
-Esta regla es estricta y se debe cumplir en TODOS los casos sin excepción.
+<structure_rules>
+- Primera diapositiva:
+  title = tema
+  content = ${nombre}
 
-REGLAS DE SALIDA:
+- Todas las referencias deben ir en una sola diapositiva al final.
+</structure_rules>
 
-Devuelve ÚNICAMENTE un objeto JSON con una propiedad "slides" que sea un array.
-Cada objeto debe tener:
-"title": título corto.
-"content": SIEMPRE string (nunca array).
-Idioma igual al texto de entrada.
-Máximo 12 diapositivas.
-Todas las referencias en una sola slide.
-No usar la palabra "clave" ni "fundamental".
+<output_format>
+Devuelve ÚNICAMENTE JSON válido:
 
-EJEMPLO DE FORMATO:
 {
-"slides": [
-{ "title": "Título de la Presentación", "content": "Nombre del Usuario" },
-{ "title": "¿Por qué es importante?", "content": "La biodiversidad sostiene la vida en la Tierra. Sin ecosistemas sanos, la economía y la salud colapsan." },
-{ "title": "Principales Riesgos", "content": "• Pérdida de hábitats.\n" +
-"• Cambio climático.\n" +
-"• Sobreexplotación de recursos." }
-]
+  "slides": [
+    { "title": "string", "content": "string" }
+  ]
 }
+</output_format>
+
+<consistency_rules>
+- No repetir ideas entre diapositivas.
+- No resumir en exceso.
+- Priorizar cobertura completa sobre brevedad.
+</consistency_rules>
           `,
         },
         {

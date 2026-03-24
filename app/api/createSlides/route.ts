@@ -2,17 +2,60 @@ import { google } from "googleapis";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
+type SlideItem = {
+  title: string;
+  content: string;
+};
+
 const oauth2Client = new google.auth.OAuth2(
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
   "postmessage"
 );
 
+function normalizeSlidesContent(raw: unknown): SlideItem[] {
+  let parsed: any = raw;
+
+  if (typeof parsed === "string") {
+    try {
+      parsed = JSON.parse(parsed);
+    } catch {
+      return [];
+    }
+  }
+
+  const slides = Array.isArray(parsed) ? parsed : parsed?.slides;
+
+  if (!Array.isArray(slides)) return [];
+
+  return slides
+    .map((slide: any) => ({
+      title: String(slide?.title ?? "").trim(),
+      content: String(slide?.content ?? "").trim(),
+    }))
+    .filter((slide: SlideItem) => slide.title.length > 0 || slide.content.length > 0);
+}
+
+function chunkArray<T>(arr: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    chunks.push(arr.slice(i, i + size));
+  }
+  return chunks;
+}
+
+function getPlaceholderShapeId(
+  slide: any,
+  types: string[]
+): string | undefined {
+  return slide?.pageElements?.find(
+    (el: any) => types.includes(el?.shape?.placeholder?.type)
+  )?.objectId;
+}
+
 export async function POST(req: Request) {
   try {
     const { code, title, content, activeUser } = await req.json();
-
-    console.log(content)
 
     const email = activeUser?.email;
     if (!email) {
@@ -52,7 +95,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ needsLogin: true, reason: "no_token" }, { status: 401 });
     }
 
-    // ── 3. Validar que el token pertenece a la cuenta correcta ────────────────
     try {
       oauth2Client.setCredentials({ refresh_token: refreshToken });
       const accessTokenRes = await oauth2Client.getAccessToken();
@@ -77,84 +119,113 @@ export async function POST(req: Request) {
       );
     }
 
-    // ── 4. Autenticar y crear la presentación ────────────────────────────────
     oauth2Client.setCredentials({ refresh_token: refreshToken });
-    const slides = google.slides({ version: "v1", auth: oauth2Client });
+    const slidesApi = google.slides({ version: "v1", auth: oauth2Client });
 
-    const presentation = await slides.presentations.create({
+    const presentation = await slidesApi.presentations.create({
       requestBody: { title },
     });
 
     const presentationId = presentation.data.presentationId;
-
-    if (!presentationId){
-      throw new Error("No se pudo crear la presentación")
+    if (!presentationId) {
+      throw new Error("No se pudo crear la presentación");
     }
 
-    if (content && Array.isArray(content) && presentationId) {
+    const slidesData = normalizeSlidesContent(content);
 
-      // PASO 1: Crear las diapositivas restantes (la 0 usa la diapositiva por defecto)
-      const createSlidesRequests: any[] = [];
-      for (let i = 1; i < content.length; i++) {
-        createSlidesRequests.push({
-          createSlide: {
-            objectId: `generated_slide_${i}`,
-            slideLayoutReference: { predefinedLayout: "TITLE_AND_BODY" },
+    if (!slidesData.length) {
+      return NextResponse.json({
+        url: `https://docs.google.com/presentation/d/${presentationId}/edit`,
+      });
+    }
+
+    // Leer la presentación inicial para obtener el ID de la primera diapositiva
+    const initialPresentation = await slidesApi.presentations.get({ presentationId });
+    const defaultSlideId = initialPresentation.data.slides?.[0]?.objectId;
+
+    if (!defaultSlideId) {
+      throw new Error("No se pudo obtener la diapositiva inicial");
+    }
+
+    const createSlideRequests: any[] = [];
+    for (let i = 1; i < slidesData.length; i++) {
+      createSlideRequests.push({
+        createSlide: {
+          objectId: `generated_slide_${i}`,
+          slideLayoutReference: { predefinedLayout: "TITLE_AND_BODY" },
+        },
+      });
+    }
+
+    if (createSlideRequests.length > 0) {
+      await slidesApi.presentations.batchUpdate({
+        presentationId,
+        requestBody: { requests: createSlideRequests },
+      });
+    }
+
+    const updatedPresentation = await slidesApi.presentations.get({ presentationId });
+
+    const slidesById = new Map<string, any>(
+      (updatedPresentation.data.slides ?? []).map((slide: any) => [slide.objectId, slide])
+    );
+
+    const insertRequests: any[] = [];
+
+    slidesData.forEach((item, index) => {
+      const slideId = index === 0 ? defaultSlideId : `generated_slide_${index}`;
+      const currentSlide = slidesById.get(slideId);
+
+      if (!currentSlide) return;
+
+      const titleShapeId = getPlaceholderShapeId(currentSlide, [
+        "TITLE",
+        "CENTERED_TITLE",
+      ]);
+
+      const bodyShapeId = getPlaceholderShapeId(currentSlide, [
+        "BODY",
+        "SUBTITLE",
+      ]);
+
+      if (titleShapeId && item.title) {
+        insertRequests.push({
+          deleteText: {
+            objectId: titleShapeId,
+            textRange: { type: "ALL" },
+          },
+        });
+
+        insertRequests.push({
+          insertText: {
+            objectId: titleShapeId,
+            text: item.title,
           },
         });
       }
 
-      if (createSlidesRequests.length > 0) {
-        await slides.presentations.batchUpdate({
-          presentationId,
-          requestBody: { requests: createSlidesRequests },
+      if (bodyShapeId && item.content) {
+        insertRequests.push({
+          deleteText: {
+            objectId: bodyShapeId,
+            textRange: { type: "ALL" },
+          },
+        });
+
+        insertRequests.push({
+          insertText: {
+            objectId: bodyShapeId,
+            text: item.content,
+          },
         });
       }
+    });
 
-      // PASO 2: Obtener la presentación actualizada para leer los IDs de los cuadros de texto
-      const updatedPresentation = await slides.presentations.get({ presentationId });
-
-      const insertTextRequests: any[] = [];
-
-      content.forEach((item, index) => {
-        const currentSlide = updatedPresentation.data.slides?.[index];
-
-        if (currentSlide && currentSlide.pageElements) {
-          const titleShape = currentSlide.pageElements.find(
-            (el) => el.shape?.placeholder?.type === "TITLE" || el.shape?.placeholder?.type === "CENTERED_TITLE"
-          );
-
-          const bodyShape = currentSlide.pageElements.find(
-            (el) => el.shape?.placeholder?.type === "BODY" || el.shape?.placeholder?.type === "SUBTITLE"
-          );
-
-          if (titleShape?.objectId) {
-            insertTextRequests.push({
-              insertText: {
-                objectId: titleShape.objectId,
-                text: item.title,
-              },
-            });
-          }
-
-          if (bodyShape?.objectId) {
-            insertTextRequests.push({
-              insertText: {
-                objectId: bodyShape.objectId,
-                text: item.content,
-              },
-            });
-          }
-        }
+    for (const chunk of chunkArray(insertRequests, 50)) {
+      await slidesApi.presentations.batchUpdate({
+        presentationId,
+        requestBody: { requests: chunk },
       });
-
-      // PASO 3: Ejecutar la inserción de texto
-      if (insertTextRequests.length > 0) {
-        await slides.presentations.batchUpdate({
-          presentationId,
-          requestBody: { requests: insertTextRequests },
-        });
-      }
     }
 
     return NextResponse.json({
@@ -162,6 +233,9 @@ export async function POST(req: Request) {
     });
   } catch (error: any) {
     console.error("Error creating slides:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message ?? "Unknown error" },
+      { status: 500 }
+    );
   }
 }

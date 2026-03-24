@@ -22,6 +22,16 @@
 }
 
 
+@keyframes ping-slow {
+  0%, 100% { transform: scale(1); opacity: 0.15; }
+  10%       { transform: scale(1.8); opacity: 0; }
+  11%, 99%  { transform: scale(1); opacity: 0; }
+}
+
+.ping-slow {
+  animation: ping-slow 4s ease-out infinite;
+}
+
 .row {
   display: grid;
   gap: 12px;

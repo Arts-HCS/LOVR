@@ -7,7 +7,6 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
 export default function register() {
-
   const [baseText, setBaseText] = useState("Comienza a \nenamorarte");
 
   const [baseTyped, setBaseTyped] = useState("");
@@ -89,33 +88,68 @@ export default function register() {
       ))}
 
       <Header loginBtn={true}></Header>
-      <section className="flex flex-col xl:flex-row items-start justify-start z-10 90-vh">
-
-        <div className="w-full xl:w-[45%] rounded-br-3xl rounded-tr-3xl glass-dark-all-borders h-fit p-5 xl:p-9">
+      <section className="flex flex-col xl:flex-row items-start justify-start z-10 min-h-screen">
+        <div className="w-full xl:w-[45%] rounded-br-3xl rounded-tr-3xl glass-dark-all-borders h-fit p-5 xl:p-9 flex flex-col">
           <h3 className="text-[35px] xl:text-[53px] text-(--white-color) font-medium mb-2">
             Crear cuenta
           </h3>
+
           {success ? (
-            <div className="w-full h-fit py-10 flex items-center justify-end flex-col gap-5 glass-dark-all-borders text-(--whtite-color) rounded-2xl">
-              <h1 className="text-xl">¡Tu cuenta ha sido creada, {gottenName}!</h1>
-              <Link className="text-2xl text-(--white-color) glass-dark-all-borders bg-[rgba(0,0,0,0.7)] px-10 py-5 rounded-full hover:bg-[rgba(0,0,0,0.4)] transition-all" href={"/login"}>Iniciar sesión</Link>
+            <div className="flex-1 flex flex-col items-center justify-between py-8">
+              {/* Espaciador top */}
+              <div />
+
+              {/* Centro */}
+              <div className="flex flex-col items-center gap-5">
+
+                <div className="text-center flex flex-col gap-2">
+                  <p className="text-sm uppercase tracking-[0.2em] opacity-40 text-(--white-color)">
+                    Cuenta creada
+                  </p>
+                  <h2 className="text-3xl xl:text-4xl font-medium text-(--white-color)">
+                    ¡Qué gusto,{" "}
+                    <span style={{ color: "#eb6f6f" }}>{gottenName}!</span>
+                  </h2>
+                  <p className="text-sm opacity-35 text-[16px] text-(--white-color) mt-1 mb-8">
+                    Ya puedes iniciar sesión y comenzar a usar LOVR
+                  </p>
+                </div>
+              </div>
+
+              {/* CTA anclado abajo */}
+              <Link
+                href="/login"
+                className="w-full text-center py-4 rounded-full text-(--white-color) text-base tracking-wide transition-all hover:opacity-80 active:scale-95"
+                style={{
+                  background: "rgba(235,111,111,0.12)",
+                  border: "1px solid rgba(235,111,111,0.3)",
+                }}
+              >
+                Iniciar sesión →
+              </Link>
             </div>
-            
-          ): (
-            <RegisterForm setBaseText={setBaseText} setGottenName={setGottenName} setSuccess={setSuccess}></RegisterForm>
+          ) : (
+            <RegisterForm
+              setBaseText={setBaseText}
+              setGottenName={setGottenName}
+              setSuccess={setSuccess}
+            />
           )}
         </div>
-
         <div className="hidden xl:flex h-full w-[55%] items-center justify-start pt-20 px-5 flex-col">
           <h4 className="text-9xl whitespace-pre-line font-medium register-color text-center h-[62%]">
             {baseTyped}
             <span className="capitalize">{gottenName && `, ${nameTyped}`}</span>
           </h4>
           {baseText === "Tu cuenta ya existe" && (
-            <Link className="text-2xl text-(--white-color) glass-dark-all-borders bg-[rgba(0,0,0,0.7)] px-10 py-5 rounded-full hover:bg-[rgba(0,0,0,0.4)] transition-all" href={"/login"}>Iniciar sesión</Link>
+            <Link
+              className="text-2xl text-(--white-color) glass-dark-all-borders bg-[rgba(0,0,0,0.7)] px-10 py-5 rounded-full hover:bg-[rgba(0,0,0,0.4)] transition-all"
+              href={"/login"}
+            >
+              Iniciar sesión
+            </Link>
           )}
         </div>
-
       </section>
 
       <Footer></Footer>
