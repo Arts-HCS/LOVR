@@ -15,7 +15,6 @@ export default function register() {
   const [gottenName, setGottenName] = useState("");
   const [success, setSuccess] = useState(false);
 
-  // Animar texto base SOLO al cargar
   useEffect(() => {
     let i = 0;
 
@@ -76,7 +75,7 @@ export default function register() {
   }, []);
 
   return (
-    <main className="flex flex-col min-h-screen px-4 overflow-hidden relative">
+    <main className="flex flex-col px-4 overflow-hidden relative">
       <div className="second-blur-window-big"></div>
       {[1, 4, 9, 16].map((delay, i) => (
         <div
@@ -90,9 +89,9 @@ export default function register() {
       ))}
 
       <Header loginBtn={true}></Header>
-      <section className="flex flex-col xl:flex-row items-start justify-start z-10 min-h-[90vh]">
+      <section className="flex flex-col xl:flex-row items-start justify-start z-10 90-vh">
 
-        <div className="w-full xl:w-[45%] rounded-br-3xl rounded-tr-3xl glass-dark-all-borders xl:h-[90vh] p-5 xl:p-9">
+        <div className="w-full xl:w-[45%] rounded-br-3xl rounded-tr-3xl glass-dark-all-borders h-fit p-5 xl:p-9">
           <h3 className="text-[35px] xl:text-[53px] text-(--white-color) font-medium mb-2">
             Crear cuenta
           </h3>

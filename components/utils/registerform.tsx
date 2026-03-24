@@ -62,7 +62,7 @@ export default function RegisterForm({
   };
 
   return (
-    <form onSubmit={(e) => handleSend(e)} className="flex flex-col w-[84%] p-5">
+    <form onSubmit={(e) => handleSend(e)} className="flex flex-col w-[84%] p-5 h-fit">
       <label className="mb-2 text-xl" htmlFor="name">
         Nombre
       </label>
