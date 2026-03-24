@@ -53,7 +53,7 @@ function ExportButton({
   const googleLogin = useGoogleLogin({
     flow: "auth-code",
     scope:
-      "https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/presentations",
+      "https://www.googleapis.com/auth/drive.file",
     onSuccess: (codeResponse) => handleExport(codeResponse.code),
     onError: (err) => console.error(err),
   });
