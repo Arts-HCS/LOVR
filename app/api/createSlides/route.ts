@@ -87,6 +87,10 @@ export async function POST(req: Request) {
 
     const presentationId = presentation.data.presentationId;
 
+    if (!presentationId){
+      throw new Error("No se pudo crear la presentación")
+    }
+
     if (content && Array.isArray(content) && presentationId) {
 
       // PASO 1: Crear las diapositivas restantes (la 0 usa la diapositiva por defecto)

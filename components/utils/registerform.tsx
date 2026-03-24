@@ -17,9 +17,10 @@ export default function RegisterForm({ setBaseText, setGottenName, setSuccess }:
         confirmpassword: ""
     })
 
-    const [error, setError] = useState(false)
+    const [error, setError] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-    const handleSend = async (e:SubmitEvent | any) =>{
+    const handleSend = async (e: React.FormEvent<HTMLFormElement>) =>{
         e.preventDefault()
         const {name, email, password, confirmpassword} = formData
         
@@ -29,7 +30,7 @@ export default function RegisterForm({ setBaseText, setGottenName, setSuccess }:
 
         } 
 
-        const data = await fetch('http://localhost:3000/api/registerUser', {
+        const data = await fetch('/api/registerUser', {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json'
@@ -115,7 +116,7 @@ export default function RegisterForm({ setBaseText, setGottenName, setSuccess }:
                 placeholder="Confirma tu contraseña..." 
             />
             {error && <h1 className="text-center text-2xl mb-4 bg-(--red-color) rounded-2xl">Las contraseñas no coinciden</h1>}
-            <button onClick={(e) => e.target.value = "Cargando..."} type="submit" className="bg-(--blackground) text-(--white-color) p-3 rounded-2xl hover:bg-(--background) hover:text-(--black-color) transition-all cursor-pointer">Registrarme</button>
+            <button onClick={() => setLoading(true)} disabled={loading} type="submit" className="bg-(--blackground) text-(--white-color) p-3 rounded-2xl hover:bg-(--background) hover:text-(--black-color) transition-all cursor-pointer">{loading ? "Cargando..." : "Registrarme"}</button>
             
         </form>
     )

@@ -62,7 +62,7 @@ export default function Home() {
 
   const inputRefs = useRef<HTMLInputElement[]>([]);
 
-  const userBoxRef = useRef(null);
+  const userBoxRef = useRef<HTMLDivElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const [userBoxActive, setUserBoxActive] = useState(false);
 

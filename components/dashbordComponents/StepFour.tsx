@@ -143,13 +143,13 @@ export default function StepFour({
     });
 
     const repeatedTexts: any = [];
-    let splittedTexts = allowedTexts.map((text) => text.split(" "));
+    let splittedTexts = allowedTexts.map((text:any) => text.split(" "));
 
     splittedTexts.forEach((currentText: any) => {
       splittedTexts.forEach((comparedText: any) => {
         if (currentText === comparedText) return;
         let count = 0;
-        currentText.forEach((word) => {
+        currentText.forEach((word:any) => {
           if (comparedText.includes(word)) { count++; return; }
         });
         if (

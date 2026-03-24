@@ -1,16 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-function createToken() {
-  return (
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15)
-  );
-}
+type Props = {
+  unauthorized?: string;
+};
 
-export default function LoginForm() {
+export default function LoginForm({ unauthorized: unauthorizedParam }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [fetchResponse, setFetchResponse] = useState("");
   const [unauthorized, setUnauthorized] = useState(false);
@@ -21,7 +18,6 @@ export default function LoginForm() {
   });
 
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const handlePassword = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -38,10 +34,7 @@ export default function LoginForm() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        email,
-        password,
-      }),
+      body: JSON.stringify({ email, password }),
     });
 
     const resp = await data.json();
@@ -56,20 +49,17 @@ export default function LoginForm() {
   };
 
   useEffect(() => {
-    if (searchParams.get("unauthorized") === "1") {
+    if (unauthorizedParam === "1") {
       setUnauthorized(true);
       router.replace("/login");
     }
 
     localStorage.removeItem("userWelcome");
     localStorage.removeItem("texts");
-  }, [searchParams, router]);
+  }, [unauthorizedParam, router]);
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="w-full xl:w-[70%] p-5 border-[#3B3440] border-2 rounded-2xl glass-dark bg-[#0c0d0e86]"
-    >
+    <form onSubmit={handleSubmit} className="w-full xl:w-[70%] p-5 border-[#3B3440] border-2 rounded-2xl glass-dark bg-[#0c0d0e86]">
       <label className="block mb-2 text-[20px]" htmlFor="email">
         Email
       </label>
@@ -149,3 +139,4 @@ export default function LoginForm() {
     </form>
   );
 }
+

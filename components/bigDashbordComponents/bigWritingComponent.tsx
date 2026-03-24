@@ -12,8 +12,8 @@ export default function BigWritingComponent(
     }: {
         tasks: Task[],
         setTasks: React.Dispatch<React.SetStateAction<Task[]>>,
-        handleChange: (id: number, text:string, index: number) => void,
-        handleKeyDown: (e:any, id: number) => void,
+        handleChange: (id: string, text: string, index: number) => void,
+        handleKeyDown: (e: any, id: string) => void,
         inputRefs: React.MutableRefObject<HTMLInputElement[]>,
         active?: any,
         setActive?: any
@@ -21,7 +21,7 @@ export default function BigWritingComponent(
 )
 {
 
-    const handleTaskDelete = async (id:any) =>{
+    const handleTaskDelete = async (id:string) =>{
         setTasks((prev) => prev.filter((task) => task.id !== id))
         const action = await fetch('/api/deleteSavedTask', {
             method: "POST",

@@ -9,9 +9,6 @@ import Link from 'next/link';
 
 export default function Login(){
 
-  /* ===============================
-     Estrellas
-  =============================== */
 
   const starRefs = useRef<HTMLDivElement[]>([]);
 
@@ -33,10 +30,6 @@ export default function Login(){
     });
   }, []);
 
-
-  /* ===============================
-     Typing effect
-  =============================== */
 
   const texts = [
     'Tú.\nComo Nunca Antes.',
