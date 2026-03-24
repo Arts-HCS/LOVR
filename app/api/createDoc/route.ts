@@ -5,32 +5,79 @@ import { NextResponse } from "next/server";
 const oauth2Client = new google.auth.OAuth2(
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REDIRECT_URI,
+  "postmessage"
 );
 
 export async function POST(req: Request) {
   try {
-    const { code, title, content, format } = await req.json();
+    const { code, title, content, format, activeUser } = await req.json();
     
-    const cookieStore = await cookies(); 
-    let refreshToken = process.env.GOOGLE_REFRESH_TOKEN || cookieStore.get("google_refresh_token")?.value;
+    const email = activeUser?.email;
+    if (!email) {
+      return NextResponse.json({ error: "No user email provided" }, { status: 400 });
+    }
 
-    if (!refreshToken && code) {
+    const cookieStore = await cookies();
+
+    // ── 1. Si viene un code de OAuth, intercambiarlo por tokens ──────────────
+    if (code) {
       const { tokens } = await oauth2Client.getToken(code);
+      oauth2Client.setCredentials(tokens);
+    
+      const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
+      const { data: userInfo } = await oauth2.userinfo.get();
+    
+      if (userInfo.email !== email) {
+        return NextResponse.json({ needsLogin: true, reason: "account_mismatch" }, { status: 401 });
+      }
+    
       if (tokens.refresh_token) {
-        refreshToken = tokens.refresh_token;
-        
-        cookieStore.set("google_refresh_token", refreshToken, {
+        cookieStore.set(`google_refresh_token_${email}`, tokens.refresh_token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          maxAge: 60 * 60 * 24 * 30, // 30 días
+          maxAge: 60 * 60 * 24 * 30,
           path: "/",
+          sameSite: "lax",      // ← añade esto para evitar problemas con cookies en redirects
         });
+      }
+    
+      // ← Si ya tenemos credenciales válidas desde el code, continúa directo
+      //   sin pasar por la validación de refresh_token de abajo
+      const existingRefresh = cookieStore.get(`google_refresh_token_${email}`)?.value;
+      if (!tokens.refresh_token && !existingRefresh) {
+        return NextResponse.json({ needsLogin: true, reason: "no_token_after_code" }, { status: 401 });
       }
     }
 
-    if (!refreshToken) {
-      return NextResponse.json({ needsLogin: true }, { status: 401 });
+    // ── 2. Obtener el refresh token de este usuario específico ────────────────
+    const refreshToken = cookieStore.get(`google_refresh_token_${email}`)?.value;
+
+
+    // ── 3. Validar que el token pertenece a la cuenta correcta ────────────────
+    try {
+      oauth2Client.setCredentials({ refresh_token: refreshToken });
+      const accessTokenRes = await oauth2Client.getAccessToken();
+
+      if (!accessTokenRes.token) throw new Error("No access token");
+
+      const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
+      const { data: userInfo } = await oauth2.userinfo.get();
+
+      if (userInfo.email !== email) {
+        // El token guardado es de otra cuenta → pedir re-auth
+        cookieStore.delete(`google_refresh_token_${email}`);
+        return NextResponse.json(
+          { needsLogin: true, reason: "account_mismatch" },
+          { status: 401 }
+        );
+      }
+    } catch {
+      // Token inválido o expirado → pedir re-auth
+      cookieStore.delete(`google_refresh_token_${email}`);
+      return NextResponse.json(
+        { needsLogin: true, reason: "invalid_token" },
+        { status: 401 }
+      );
     }
 
     // 4. CONFIGURAR CREDENCIALES

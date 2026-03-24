@@ -30,13 +30,13 @@ export default function register() {
     }, 70);
 
     return () => clearInterval(interval);
-  }, [baseText]); // <- solo una vez
+  }, [baseText]);
 
   useEffect(() => {
     if (!gottenName) return;
 
     let i = 0;
-    setNameTyped(""); // reinicia solo el nombre
+    setNameTyped("");
 
     const interval = setInterval(() => {
       i++;
@@ -89,10 +89,11 @@ export default function register() {
         />
       ))}
 
-      <Header></Header>
-      <section className="flex items-start justify-start z-10 h-[90vh]">
-        <div className="w-[45%] rounded-br-3xl rounded-tr-3xl glass-dark-all-borders h-[90vh] p-9">
-          <h3 className="text-[53px] text-(--white-color) font-medium mb-2">
+      <Header loginBtn={true}></Header>
+      <section className="flex flex-col xl:flex-row items-start justify-start z-10 min-h-[90vh]">
+
+        <div className="w-full xl:w-[45%] rounded-br-3xl rounded-tr-3xl glass-dark-all-borders xl:h-[90vh] p-5 xl:p-9">
+          <h3 className="text-[35px] xl:text-[53px] text-(--white-color) font-medium mb-2">
             Crear cuenta
           </h3>
           {success ? (
@@ -104,9 +105,9 @@ export default function register() {
           ): (
             <RegisterForm setBaseText={setBaseText} setGottenName={setGottenName} setSuccess={setSuccess}></RegisterForm>
           )}
-          
         </div>
-        <div className="h-full w-[55%] flex items-center justify-start pt-20 px-5 flex-col">
+
+        <div className="hidden xl:flex h-full w-[55%] items-center justify-start pt-20 px-5 flex-col">
           <h4 className="text-9xl whitespace-pre-line font-medium register-color text-center h-[62%]">
             {baseTyped}
             <span className="capitalize">{gottenName && `, ${nameTyped}`}</span>
@@ -115,6 +116,7 @@ export default function register() {
             <Link className="text-2xl text-(--white-color) glass-dark-all-borders bg-[rgba(0,0,0,0.7)] px-10 py-5 rounded-full hover:bg-[rgba(0,0,0,0.4)] transition-all" href={"/login"}>Iniciar sesión</Link>
           )}
         </div>
+
       </section>
 
       <Footer></Footer>

@@ -1,0 +1,118 @@
+<task>
+  Reescribe por completo el texto proporcionado en <source_text> usando las reglas del <style_rulebook> como única guía de estilo.
+  Tu objetivo es producir un texto nuevo en su redacción, no una simple paráfrasis ni una corrección ligera.
+  Debes conservar el significado esencial, los datos, las cifras, los nombres propios, la intención y la estructura general, pero no la redacción original.
+  El output debe sonar como si el usuario hubiera escrito ese contenido desde cero.
+  Tu único output debe ser el texto reescrito. No incluyas saludos, explicaciones, notas, aclaraciones ni cierres.
+</task>
+
+<style_rulebook>
+  {{STYLE_RULEBOOK}}
+</style_rulebook>
+
+<source_text>
+  {{SOURCE_TEXT}}
+</source_text>
+
+<structure_rules>
+  Preserva únicamente la arquitectura visible del texto original. Esto incluye, sin excepción:
+  - Títulos y subtítulos.
+  - Divisiones numeradas o etiquetadas.
+  - Listas, viñetas, apartados y jerarquías.
+  - El orden general de las secciones.
+
+  No preservas la redacción interna de esos bloques. Cada sección debe ser reescrita con libertad total.
+</structure_rules>
+
+<rewriting_instructions>
+  1. Lee el <style_rulebook> completo antes de escribir. Identifica las dimensiones marcadas como CLAVE y aplícalas con prioridad absoluta.
+
+  2. El texto final debe tener alta distancia léxica y sintáctica respecto al original.
+     No hagas sustituciones palabra por palabra.
+     No copies la estructura de las oraciones del texto de origen.
+     No mantengas el mismo ritmo, el mismo orden de ideas dentro de la frase ni las mismas transiciones.
+
+  3. Conserva el contenido, pero cambia la forma de manera profunda.
+     Puedes:
+     - Reordenar cláusulas.
+     - Dividir una oración larga en varias.
+     - Unir varias oraciones cortas en una sola.
+     - Cambiar el punto de vista gramatical si no altera el sentido.
+     - Sustituir construcciones literales por formulaciones naturales del autor.
+     - Eliminar repeticiones mecánicas del original.
+     - Cambiar conectores, aperturas y cierres de frase.
+     - Reformular definiciones, explicaciones y enumeraciones sin copiar su sintaxis.
+
+  4. El texto reescrito debe sentirse humano y autoral, no derivado.
+     Prioriza la voz del <style_rulebook> sobre la forma superficial del original.
+     Si una frase del original suena genérica, rígida o automática, reescríbela de forma más orgánica.
+     Si una idea puede decirse con otra construcción más natural para el autor, cámbiala.
+
+  5. No repitas literalmente frases del texto original salvo que sean inevitables.
+     Solo puedes conservar literalidad en:
+     - Títulos y subtítulos.
+     - Etiquetas estructurales.
+     - Nombres propios.
+     - Cifras, fechas, fórmulas, códigos o términos técnicos que no deban alterarse.
+
+  6. Si el texto original tiene un tono claramente IA, neutral o inflado, humanízalo de forma fuerte:
+     - Reduce rigidez.
+     - Elimina frases plantilla.
+     - Rompe simetrías demasiado limpias.
+     - Evita conectores decorativos.
+     - Evita cierres automáticos.
+     - Haz que la prosa suene natural.
+
+  7. Mantén el estilo del usuario aunque el texto original sea de otro tono.
+     Si el género es distinto, conserva la voz y ajusta solo lo necesario para que el texto funcione.
+
+  8. La meta no es parecer una corrección.
+     La meta es que el texto final parezca escrito desde cero por otra mano con la voz del usuario.
+
+  9. Si el contenido permite múltiples formas equivalentes, elige la que más se aleje del molde del original sin perder precisión.
+     No uses calcos sintácticos.
+     No conserves la longitud de las frases por inercia.
+</rewriting_instructions>
+
+<anti_copying_rules>
+  - No mantengas la misma apertura de oración que el original.
+  - No mantengas la misma clausura de oración que el original.
+  - No repitas la misma combinación de conectores del original.
+  - No reproduzcas la misma cadencia de párrafos si puede evitarse.
+  - No copies patrones típicos de texto IA.
+</anti_copying_rules>
+
+<lexical_constraints>
+  Prohibido usar estas palabras y cualquier variación, conjugación o derivado cercano:
+  - esencial
+  - compleja / complejo
+  - aspectos
+  - se vuelven
+  - altera / alterar / alteración
+  - ya que
+  - permite / permitir / permitido
+  - proporciona / proporcionar
+  - funcionamiento
+  - fundamental /fundamentales
+  - pilar / pilares
+  - requiere / requerir
+  - síntesis
+
+  Sustituye siempre por expresiones más simples y naturales.
+</lexical_constraints>
+
+<format_constraints>
+  - Elimina completamente cualquier marca de formato tipo Markdown:
+    ##, ###, **, *, _, ~~, `.
+  - No uses negritas, cursivas ni resaltados.
+  - Mantén títulos y jerarquía solo mediante texto plano, mayúsculas, numeración o saltos de línea.
+</format_constraints>
+
+<output_format>
+  - Devuelve únicamente el texto final.
+  - Sin encabezados adicionales.
+  - Sin etiquetas como "Versión reescrita".
+  - Sin comentarios.
+  - Sin comillas envolviendo el texto.
+  - El resultado debe empezar directamente con el primer elemento estructural del texto.
+</output_format>

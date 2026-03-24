@@ -5,39 +5,82 @@ import { NextResponse } from "next/server";
 const oauth2Client = new google.auth.OAuth2(
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  process.env.GOOGLE_REDIRECT_URI,
+  "postmessage"
 );
 
 export async function POST(req: Request) {
   try {
-    const { code, title, content } = await req.json();
+    const { code, title, content, activeUser } = await req.json();
+
+    console.log(content)
+
+    const email = activeUser?.email;
+    if (!email) {
+      return NextResponse.json({ error: "No user email provided" }, { status: 400 });
+    }
 
     const cookieStore = await cookies();
-    let refreshToken = process.env.GOOGLE_REFRESH_TOKEN || cookieStore.get("google_refresh_token")?.value;
 
-    if (!refreshToken && code) {
+    if (code) {
       const { tokens } = await oauth2Client.getToken(code);
+      oauth2Client.setCredentials(tokens);
+
+      const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
+      const { data: userInfo } = await oauth2.userinfo.get();
+
+      if (userInfo.email !== email) {
+        return NextResponse.json(
+          { needsLogin: true, reason: "account_mismatch" },
+          { status: 401 }
+        );
+      }
+
       if (tokens.refresh_token) {
-        refreshToken = tokens.refresh_token;
-        
-        cookieStore.set("google_refresh_token", refreshToken, {
+        cookieStore.set(`google_refresh_token_${email}`, tokens.refresh_token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
-          maxAge: 60 * 60 * 24 * 30, // 30 días
+          maxAge: 60 * 60 * 24 * 30,
           path: "/",
+          sameSite: "lax",
         });
       }
     }
 
+    const refreshToken = cookieStore.get(`google_refresh_token_${email}`)?.value;
+
     if (!refreshToken) {
-      return NextResponse.json({ needsLogin: true }, { status: 401 });
+      return NextResponse.json({ needsLogin: true, reason: "no_token" }, { status: 401 });
     }
 
-    // 4. Autenticar silenciosamente
+    // ── 3. Validar que el token pertenece a la cuenta correcta ────────────────
+    try {
+      oauth2Client.setCredentials({ refresh_token: refreshToken });
+      const accessTokenRes = await oauth2Client.getAccessToken();
+
+      if (!accessTokenRes.token) throw new Error("No access token");
+
+      const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
+      const { data: userInfo } = await oauth2.userinfo.get();
+
+      if (userInfo.email !== email) {
+        cookieStore.delete(`google_refresh_token_${email}`);
+        return NextResponse.json(
+          { needsLogin: true, reason: "account_mismatch" },
+          { status: 401 }
+        );
+      }
+    } catch {
+      cookieStore.delete(`google_refresh_token_${email}`);
+      return NextResponse.json(
+        { needsLogin: true, reason: "invalid_token" },
+        { status: 401 }
+      );
+    }
+
+    // ── 4. Autenticar y crear la presentación ────────────────────────────────
     oauth2Client.setCredentials({ refresh_token: refreshToken });
     const slides = google.slides({ version: "v1", auth: oauth2Client });
 
-    // 5. Crear la presentación directamente
     const presentation = await slides.presentations.create({
       requestBody: { title },
     });
@@ -45,9 +88,8 @@ export async function POST(req: Request) {
     const presentationId = presentation.data.presentationId;
 
     if (content && Array.isArray(content) && presentationId) {
-      
-      // PASO 1: Crear las diapositivas RESTANTES. 
-      // Empezamos desde el índice 1, porque el índice 0 usará la diapositiva por defecto.
+
+      // PASO 1: Crear las diapositivas restantes (la 0 usa la diapositiva por defecto)
       const createSlidesRequests: any[] = [];
       for (let i = 1; i < content.length; i++) {
         createSlidesRequests.push({
@@ -67,21 +109,17 @@ export async function POST(req: Request) {
 
       // PASO 2: Obtener la presentación actualizada para leer los IDs de los cuadros de texto
       const updatedPresentation = await slides.presentations.get({ presentationId });
-      
+
       const insertTextRequests: any[] = [];
 
-      // Iteramos sobre todo el contenido del JSON
       content.forEach((item, index) => {
-        // Obtenemos la diapositiva correspondiente (la 0 es la de por defecto, de la 1 en adelante son las nuevas)
-        const currentSlide = updatedPresentation.data.slides?.[index]; 
-        
-        if (currentSlide && currentSlide.pageElements) { 
-          // Buscamos el cuadro de texto del TÍTULO (CENTERED_TITLE para la primera, TITLE para el resto)
+        const currentSlide = updatedPresentation.data.slides?.[index];
+
+        if (currentSlide && currentSlide.pageElements) {
           const titleShape = currentSlide.pageElements.find(
             (el) => el.shape?.placeholder?.type === "TITLE" || el.shape?.placeholder?.type === "CENTERED_TITLE"
           );
-          
-          // Buscamos el cuadro de texto del CUERPO (SUBTITLE para la primera, BODY para el resto)
+
           const bodyShape = currentSlide.pageElements.find(
             (el) => el.shape?.placeholder?.type === "BODY" || el.shape?.placeholder?.type === "SUBTITLE"
           );
@@ -106,7 +144,7 @@ export async function POST(req: Request) {
         }
       });
 
-      // PASO 3: Ejecutar la inserción de texto en los IDs correctos
+      // PASO 3: Ejecutar la inserción de texto
       if (insertTextRequests.length > 0) {
         await slides.presentations.batchUpdate({
           presentationId,

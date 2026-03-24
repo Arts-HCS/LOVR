@@ -20,39 +20,58 @@ export async function POST(req: Request) {
 
 
     const response = await client.chat.completions.create({
-      model: "gpt-5-mini",
+      model: "gpt-5.4-mini",
       messages: [
         {
           role: "system",
           content: `
-            Tu objetivo es transformar textos largos en una estructura de diapositivas lógica, natural y visualmente ligera, evitando la saturación de información.
+           Tu objetivo es transformar textos largos en una estructura de diapositivas lógica, natural y visualmente ligera, evitando la saturación de información.
 
 REGLAS DE DISEÑO DE CONTENIDO:
-1. DIAPOSITIVA INICIAL: La primera diapositiva debe ser la carátula. "title" será el título general del tema y "content" el nombre del usuario: ${nombre}. "Title" debe ser solo el tema, por ejemplo, en vez de "Trabajo de Biología: La fotosíntesis", solo "La fotosíntesis".
-2. TÍTULOS DIRECTOS: Usa nombres de temas simples (ej. "La biodiversidad") o preguntas (ej. "¿Cómo nos afecta?"). Prohibido el uso de adjetivos robóticos como "central", "operativa", "concreta" o "integral".
-3. RITMO Y VARIEDAD: No todas las diapositivas deben verse igual. Intercala el formato de "content" entre:
-   - Párrafos cortos: Máximo 2 o 3 líneas con una idea potente.
-   - Listas de puntos: Máximo 3 o 4 puntos breves.
-4. COHESIÓN NARRATIVA: El contenido debe ser fluido. Evita puntos que parezcan recados aislados; usa oraciones completas que conecten la lógica del tema (ej. "Esta crisis no solo afecta al clima, sino que pone en riesgo nuestra seguridad alimentaria").
-5. CONTROL DE DENSIDAD: Si una idea es muy larga, divídela en dos diapositivas. El "content" nunca debe verse como un bloque denso de texto. Prioriza la claridad visual.
+
+DIAPOSITIVA INICIAL: La primera diapositiva debe ser la carátula. "title" será el título general del tema y "content" el nombre del usuario: ${nombre}. "title" debe ser solo el tema, por ejemplo, en vez de "Trabajo de Biología: La fotosíntesis", solo "La fotosíntesis".
+TÍTULOS DIRECTOS: Usa nombres de temas simples (ej. "La biodiversidad") o preguntas (ej. "¿Cómo nos afecta?"). Prohibido el uso de adjetivos como "central", "operativa", "concreta" o "integral".
+RITMO Y VARIEDAD: Intercala el formato de "content":
+Párrafos cortos: Máximo 2 o 3 líneas.
+Listas: Máximo 3 o 4 puntos breves.
+COHESIÓN NARRATIVA: El contenido debe ser fluido. Usa oraciones completas que conecten ideas.
+CONTROL DE DENSIDAD: Divide ideas largas en varias diapositivas. Evita bloques densos.
+
+REGLA CRÍTICA DE FORMATO (OBLIGATORIA):
+
+"content" SIEMPRE debe ser un STRING.
+NUNCA uses arrays, listas JSON ni estructuras como:
+content: [ "texto1", "texto2" ]
+Cuando haya múltiples líneas o puntos, debes usar un SOLO string concatenado con saltos de línea (\n) y el operador "+".
+
+Formato obligatorio en listas:
+
+content: '• Punto uno.\n' +
+'• Punto dos.\n' +
+'• Punto tres.'
+
+Esta regla es estricta y se debe cumplir en TODOS los casos sin excepción.
 
 REGLAS DE SALIDA:
-1. Devuelve ÚNICAMENTE un objeto JSON con una propiedad llamada "slides" que sea un array de objetos.
-2. Cada objeto debe tener:
-   - "title": El título corto y natural.
-   - "content": El texto (en párrafo o lista) que respete el ritmo y la brevedad.
-3. El idioma debe ser el mismo que el del texto de entrada.
-4. No hacer más de 12 diapositivas.
-5. Todas las referencias deben estar en una misma slide.
-6. Nunca uses la palabra "clave" ni "fundamental".
+
+Devuelve ÚNICAMENTE un objeto JSON con una propiedad "slides" que sea un array.
+Cada objeto debe tener:
+"title": título corto.
+"content": SIEMPRE string (nunca array).
+Idioma igual al texto de entrada.
+Máximo 12 diapositivas.
+Todas las referencias en una sola slide.
+No usar la palabra "clave" ni "fundamental".
 
 EJEMPLO DE FORMATO:
 {
-  "slides": [
-    { "title": "Título de la Presentación", "content": "Nombre del Usuario" },
-    { "title": "¿Por qué es importante?", "content": "La biodiversidad es el pilar que sostiene la vida en la Tierra. Sin ecosistemas sanos, nuestra economía y salud colapsarían rápidamente." },
-    { "title": "Principales Riesgos", "content": "• La pérdida acelerada de hábitats naturales.\n• El cambio climático descontrolado.\n• La sobreexplotación de recursos locales." }
-  ]
+"slides": [
+{ "title": "Título de la Presentación", "content": "Nombre del Usuario" },
+{ "title": "¿Por qué es importante?", "content": "La biodiversidad sostiene la vida en la Tierra. Sin ecosistemas sanos, la economía y la salud colapsan." },
+{ "title": "Principales Riesgos", "content": "• Pérdida de hábitats.\n" +
+"• Cambio climático.\n" +
+"• Sobreexplotación de recursos." }
+]
 }
           `,
         },

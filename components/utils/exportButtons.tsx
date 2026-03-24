@@ -9,18 +9,20 @@ interface Props {
   format?: "apa" | "mla";
   slidesContent?: any;
   slidesVersion?: any;
+  activeUser: any;
 }
 
-function ExportButton({ title, content, type, format, slidesVersion }: Props) {
+function ExportButton({ title, content, type, format, slidesVersion, activeUser }: Props) {
   const endpoint = type === "doc" ? "/api/createDoc" : "/api/createSlides";
 
   const handleExport = async (code?: string) => {
     const res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: code || null, title, content, format: format || null }),
+      credentials: "include",
+      body: JSON.stringify({ code: code || null, title, content, format: format || null, activeUser }),
     });
-
+  
     const data = await res.json();
     if (data.url) {
       window.open(data.url, "_blank");
@@ -32,13 +34,16 @@ function ExportButton({ title, content, type, format, slidesVersion }: Props) {
   const googleLogin = useGoogleLogin({
     flow: "auth-code",
     scope: "https://www.googleapis.com/auth/documents https://www.googleapis.com/auth/presentations",
+    access_type: "offline",  
+    prompt: "consent",
     onSuccess: (codeResponse) => handleExport(codeResponse.code),
+    onError: (err) => console.error("Google login error:", err),
   });
 
   return (
     <button
       onClick={() => handleExport()}
-      className={`px-4 py-2 rounded-md text-left text-white text-[15.5px] font-medium cursor-pointer transition-all duration-400 
+      className={`px-2 py-2 rounded-md text-left text-white text-[15px] font-medium cursor-pointer transition-all duration-400 
         
         ${
         type === "doc" ? "bg-[#4285F4] hover:bg-[#426bf4]" : 
@@ -56,27 +61,27 @@ function ExportButton({ title, content, type, format, slidesVersion }: Props) {
 
       }
       {type === "doc" && format === "apa" ? 
-      <i className="fa-solid fa-align-left ml-2"></i> 
+      <i className="fa-solid fa-align-left ml-1"></i> 
       : type === "doc" && format === "mla" ? 
-      <i className="fa-solid fa-border-top-left ml-2"></i>  :
+      <i className="fa-solid fa-border-top-left ml-1"></i>  :
       type === "doc" && format === undefined ? 
-      <i className="fa-solid fa-arrow-up-right-from-square ml-2"></i> 
+      <i className="fa-solid fa-arrow-up-right-from-square ml-1"></i> 
       : 
-      <i className="fa-solid fa-chalkboard ml-2"></i>
+      <i className="fa-solid fa-chalkboard ml-1"></i>
 
       }
     </button>
   );
 }
 
-export default function ExportGroup({ title, content, slidesContent, slidesVersion }: { title: string; content: string; slidesContent?: any, slidesVersion?: any }) {
+export default function ExportGroup({ title, content, slidesContent, slidesVersion, activeUser }: { title: string; content: string; slidesContent?: any, slidesVersion?: any, activeUser?: any }) {
   return (
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
       <div className="flex flex-col gap-2">
-        <ExportButton title={title} content={content} type="doc" />
-        <ExportButton title={title} content={content} type="doc" format="apa" />
-        <ExportButton title={title} content={content} type="doc" format="mla" />
-        <ExportButton title={title} content={slidesContent} type="slide" slidesVersion={slidesVersion} />
+        <ExportButton title={title} content={content} type="doc" activeUser={activeUser} />
+        <ExportButton title={title} content={content} type="doc" format="apa" activeUser={activeUser}/>
+        <ExportButton title={title} content={content} type="doc" format="mla" activeUser={activeUser} />
+        <ExportButton title={title} content={slidesContent} type="slide" slidesVersion={slidesVersion} activeUser={activeUser} />
         
       </div>
     </GoogleOAuthProvider>

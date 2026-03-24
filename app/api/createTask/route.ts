@@ -1,13 +1,18 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
-
-export const runtime = 'edge';
+import { readFileSync } from "fs";
+import { join } from "path";
 
 const apiKey = process.env.OPENAI_API;
 
 const client = new OpenAI({
   apiKey: apiKey,
 });
+
+const STYLE_PROMPT = readFileSync(
+  join(process.cwd(), "prompts", "createTask.txt"),
+  "utf-8"
+);
 
 export async function POST(req: Request) {
 
@@ -32,42 +37,8 @@ export async function POST(req: Request) {
         content: `
                 Hoy es ${today}.
                 Hora actual ${time}.
-                
 
-REGLAS DE ERROR (Responde únicamente "Error"):
-
-Contenido sexual, saludos o incoherencias (caracteres sin sentido). 
-
-Sin acción/tarea clara.
-
-REGLAS DE TIEMPO:
-
-Sin día: Si es antes de 14:00 usa hoy; si es después, mañana.
-
-Sin hora: 12:00. Mediodía: 12:00, Medianoche: 00:00.
-
-Horas 1 a 4 sin contexto: asumirlas como tarde (13:00-16:00).
-
-"Mañana": día siguiente. Prohibido fechas pasadas.
-
-REGLAS DE TEXTO:
-
-Título: Breve. Materia sola → "Trabajo de [Materia]". Nombre solo → "Tarea de [Nombre]". Objetos → "Llevar [Objeto]". Si el título es específico (ej. "Reporte de física"), mantenlo exacto. No cambies sustantivos por palabras por "trabajo" o "tarea" (ej. "Ensayo de fisica" → "Ensayo de Física").
-Materia/Nombre solo o con "lo de/mi este/la cosa" → "Trabajo de [Materia/Nombre]".
-Conserva la estructura de materia (ej. "Práctica de Física" → "Práctica de Física").
-Ignora insultos o quejas (ej. "tonto de francés" → "Trabajo de Francés").
-Frases como "hacer notas" se tomarán como el título tal cual, sin forzar la estructura de materia.
-Corrige errores de ortografía y gramática.
-Primera letra y nombres propios en mayúscula siempre.
-
-Abreviaturas: Expandir (mate, bio, lite, admin, geo).
-
-Descripción: Solo datos extra relevantes. Si no hay, campo vacío.
-
-Formato: Sin texto extra, sin puntos finales, sin saltos de línea.
-
-SALIDA:
-YYYY-MM-DD,HH:MM,descripción,título
+                ${STYLE_PROMPT}
                     `,
       },
       {

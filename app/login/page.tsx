@@ -98,13 +98,13 @@ export default function Login(){
         />
       ))}
 
-      <Header/>
+      <Header loginBtn={false}/>
 
-      <section className="h-[90vh] w-full glass-dark z-100 border-x border-[#3B3440] flex items-start justify-start p-11">
+      <section className="min-h-[90vh] w-full glass-dark z-100 border-x border-[#3B3440] flex flex-col xl:flex-row items-start justify-start p-5 xl:p-11">
 
-        <div className="flex-1 h-full flex flex-col">
+        <div className="flex-1 h-full flex flex-col w-full">
 
-          <h3 className="text-[53px] text-(--white-color) font-medium mb-6">
+          <h3 className="text-[35px] xl:text-[53px] text-(--white-color) font-medium mb-6">
             Iniciar sesión
           </h3>
 
@@ -112,18 +112,18 @@ export default function Login(){
 
           <Link 
             href="/register"
-            className="py-4 bg-gray-300 px-6 rounded-2xl mt-10 w-[70%] text-center text-xl hover:bg-[#a6b1bc6b] transition-all hover:px-8 hover:scale-105 text-(--black-color)"
+            className="py-4 bg-gray-300 px-6 rounded-2xl mt-10 w-full xl:w-[70%] text-center text-xl hover:bg-[#a6b1bc6b] transition-all hover:px-8 hover:scale-105 text-(--black-color)"
           >
             Crear una cuenta
           </Link>
 
         </div>
 
-        <div className="w-150">
+        <div className="hidden xl:block w-150">
 
           <h4 className="text-9xl font-normal whitespace-pre-line register-color h-full">
             {text}
-            <span className="animate-pulse ">|</span>
+            <span className="animate-pulse">|</span>
           </h4>
 
         </div>

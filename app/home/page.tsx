@@ -143,12 +143,8 @@ export default function Home() {
   const handleKeyDown = async (e: any, id: string) => {
     if (e.key === "Backspace") {
       if (abortControllers.current[id]) {
-        // 1. Abortamos la petición de red inmediatamente
         abortControllers.current[id].abort();
-        // 2. Limpiamos la referencia
         delete abortControllers.current[id];
-
-        // 3. Cambiamos el status a 5 (anulado)
         setTasks((prev) =>
           prev.map((task) => (task.id === id ? { ...task, status: 5 } : task))
         );
@@ -158,27 +154,24 @@ export default function Home() {
     if (e.key === "Enter") {
       e.preventDefault();
       e.currentTarget.blur();
-    
+
       const nextInput = inputRefs.current[inputRefs.current.length - 1];
       if (nextInput) nextInput.focus();
-    
+
       const task = tasks.find((t) => t.id === id);
       if (!task) return;
-    
+
       const { content } = task;
       if (content.startsWith("8") || content.length < 2) return;
-    
-      // --- CONTROLADOR DE ABORTO ---
+
       if (abortControllers.current[id]) abortControllers.current[id].abort();
       const controller = new AbortController();
       abortControllers.current[id] = controller;
-    
-      // Estado inicial: Cargando
+
       setTasks((prev) =>
         prev.map((t) => (t.id === id ? { ...t, status: 1 } : t))
       );
-    
-      // --- PETICIÓN 1: CREAR TAREA (Prioridad) ---
+
       fetch("/api/createTask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -188,12 +181,18 @@ export default function Home() {
         .then((res) => res.json())
         .then((data) => {
           const answer = data.answer.split(",");
-          const [date, time, desc, title] = [answer[0], answer[1], answer[2], answer[3]];
-    
+          const [date, time, desc, title] = [
+            answer[0],
+            answer[1],
+            answer[2],
+            answer[3],
+          ];
+
           if (date === "Error") {
-            setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status: 2 } : t)));
+            setTasks((prev) =>
+              prev.map((t) => (t.id === id ? { ...t, status: 2 } : t))
+            );
           } else {
-            // ACTUALIZAMOS SOLO LOS DATOS DE LA TAREA
             setTasks((prev) =>
               prev.map((t) =>
                 t.id === id ? { ...t, date, time, desc, title, status: 3 } : t
@@ -204,11 +203,12 @@ export default function Home() {
         .catch((err) => {
           if (err.name !== "AbortError") {
             console.error("Error en createTask:", err);
-            setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status: 2 } : t)));
+            setTasks((prev) =>
+              prev.map((t) => (t.id === id ? { ...t, status: 2 } : t))
+            );
           }
         });
-    
-      // --- PETICIÓN 2: OPCIONES (Segundo plano) ---
+
       fetch("/api/createTaskOptions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -218,8 +218,6 @@ export default function Home() {
         .then((res) => res.json())
         .then((optionsRaw) => {
           const parsedOptions = JSON.parse(optionsRaw);
-          
-          // ACTUALIZAMOS SOLO EL CONTEXTO (sin tocar el status ni la fecha)
           setTasks((prev) =>
             prev.map((t) =>
               t.id === id ? { ...t, context: parsedOptions } : t
@@ -227,18 +225,16 @@ export default function Home() {
           );
         })
         .catch((err) => {
-          if (err.name !== "AbortError") console.error("Error en options:", err);
+          if (err.name !== "AbortError")
+            console.error("Error en options:", err);
         })
         .finally(() => {
-          // Limpiamos el controlador solo al final de todo
           delete abortControllers.current[id];
         });
     }
 
-    // --- LÓGICA RESTANTE DE TECLAS ---
     const hasAnswer = tasks.find((task) => task.id === id)?.date;
 
-    // Backspace cuando NO hay respuesta (y no hay petición activa que abortar)
     if (e.key === "Backspace" && !hasAnswer && abortControllers.current[id]) {
       setTasks((prev) =>
         prev.map((task) => (task.id === id ? { ...task, status: 5 } : task))
@@ -257,7 +253,6 @@ export default function Home() {
       );
     }
 
-    // Borrado de input vacío
     if (
       e.key === "Backspace" &&
       e.currentTarget.value === "" &&
@@ -270,17 +265,15 @@ export default function Home() {
     }
   };
 
-  // USE STATES PARA LOS BOTONES DEL LADO DERECHO
   const icons = ["fa-house", "fa-calendar", "fa-list-check", "fa-dna"];
 
   const [active, setActive] = useState<number | null>(0);
 
   function toggleButton(index: number) {
     setActive((prev) => {
-      if (prev == index){
-        return null
-      }  
-
+      if (prev == index) {
+        return null;
+      }
       return index;
     });
   }
@@ -305,17 +298,6 @@ export default function Home() {
 
   const [heartSectionActive, setHeartSectionActive] = useState(false);
 
-  // useEffect(() => {
-  //   if (active.length === 1 && active.includes(4)) {
-  //     setHeartSectionActive(true);
-  //   } else {
-  //     setHeartSectionActive(false);
-  //   }
-  // }, [active.length]);
-
-
-  // Tasks generadas que se guarden 
-  
   interface TaskGenerada {
     taskID: string;
     status: number;
@@ -325,10 +307,34 @@ export default function Home() {
 
   const [tasksGeneradas, setTasksGeneradas] = useState<TaskGenerada[]>([]);
 
+  const [headerMenuActive, setHeaderMenuActive] = useState(false);
+  const headerMenuRef = useRef<HTMLDivElement>(null);
+
+  function handleLogout() {
+    localStorage.removeItem("userWelcome");
+    route.replace("/login");
+  }
+
+  useEffect(() => {
+    function detectClickOutside(e: MouseEvent) {
+      if (
+        headerMenuActive &&
+        headerMenuRef.current &&
+        !headerMenuRef.current.contains(e.target as Node)
+      ) {
+        setHeaderMenuActive(false);
+      }
+    }
+    document.addEventListener("mousedown", detectClickOutside);
+    return () => document.removeEventListener("mousedown", detectClickOutside);
+  }, [headerMenuActive]);
+
   return (
     <main className="bg-[#202225] flex items-start justify-start w-full max-h-screen h-screen overflow-hidden">
       <div className="h-full w-full flex flex-col items-start justify-start">
-        <header className="w-full p-4 flex items-center justify-start h-15">
+
+        {/* Header */}
+        <header className="w-full px-3 sm:p-4 flex items-center justify-start h-15 shrink-0 relative">
           {heartSectionActive && (
             <button
               className="side-button"
@@ -337,27 +343,47 @@ export default function Home() {
               <i className="fa-solid fa-dna"></i>
             </button>
           )}
-          <button
-            className="flex items-center gap-2 cursor-pointer p-2 hover:bg-[#2F3136] rounded-md transition-all text-[17px]"
-            onClick={() => {}}
-          >
-            {activeUser ? activeUser.name : "Cargando..."}
-            <i className="fa-solid fa-chevron-down text-[14px] text-[#6b6e91]"></i>
-          </button>
+
+          <div className="relative" ref={headerMenuRef}>
+            <button
+              className="flex items-center gap-2 cursor-pointer p-2 hover:bg-[#2F3136] rounded-md transition-all text-[15px] sm:text-[17px]"
+              onClick={() => setHeaderMenuActive((prev) => !prev)}
+            >
+              {activeUser ? activeUser.name : "Cargando..."}
+              <i className="fa-solid fa-chevron-down text-[12px] sm:text-[14px] text-[#6b6e91]"></i>
+            </button>
+
+            {headerMenuActive && (
+              <div className="absolute top-full left-0 mt-1 bg-[#2F3136] rounded-lg shadow-lg border border-[#ffffff10] z-50 min-w-[150px] sm:min-w-[170px] overflow-hidden">
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-[#f04747] hover:bg-[#3a3d44] transition-all cursor-pointer text-[14px] sm:text-[16px]"
+                >
+                  <i className="fa-solid fa-right-from-bracket"></i>
+                  Cerrar sesión
+                </button>
+              </div>
+            )}
+          </div>
         </header>
 
-        <div className="flex h-full w-full items-start justify-start overflow-scroll">
+        {/* Contenido principal */}
+        <div className="flex h-full w-full items-start justify-start overflow-hidden">
+
           <UserBox
             activeUser={activeUser}
             setActiveUser={setActiveUser}
             userBoxActive={userBoxActive}
+            setUserBoxActive={setUserBoxActive}
             ref={userBoxRef}
-          ></UserBox>
+          />
+
+          {/* Sidebar de iconos — se oculta en móvil, visible desde sm */}
           <div
-            className={`h-full w-20 border-r border-[#dcd9de7f] ${
+            className={`h-full border-r border-[#dcd9de7f] ${
               heartSectionActive
                 ? "hidden"
-                : "flex flex-col gap-4 p-4 items-center justify-center relative"
+                : "hidden sm:flex w-14 sm:w-20 flex-col gap-4 p-2 sm:p-4 items-center justify-center relative"
             }`}
           >
             <div className="black-shadow"></div>
@@ -365,80 +391,111 @@ export default function Home() {
               <button
                 key={i}
                 onClick={() => toggleButton(i)}
-                className={`side-button ${
-                  active == i ? "button-active" : ""
-                }`}
+                className={`side-button ${active == i ? "button-active" : ""}`}
               >
                 <i className={`fa-solid ${icon}`}></i>
               </button>
             ))}
             <div className="absolute bottom-4 right-4 flex flex-col items-center">
               <button
-                className="w-8 h-8 roundef-full text-[18px] flex items-center   justify-center p-6  hover:bg-[#2F3136] hover:shadow-  [0_0_10px_#2F3136] rounded-2xl transition-all cursor-pointer"
+                className="w-8 h-8 text-[18px] flex items-center justify-center p-6 hover:bg-[#2F3136] hover:shadow-[0_0_10px_#2F3136] rounded-2xl transition-all cursor-pointer"
                 onClick={() => setUserBoxActive(!userBoxActive)}
                 ref={buttonRef}
               >
                 <i className="fa-solid fa-user text-[#979797]"></i>
               </button>
-              <button className="w-8 h-8 roundef-full text-[18px] flex items-center   justify-center p-6 hover:bg-[#2F3136] hover:shadow-   [0_0_10px_#2F3136] rounded-2xl transition-all">
+              <button className="w-8 h-8 text-[18px] flex items-center justify-center p-6 hover:bg-[#2F3136] hover:shadow-[0_0_10px_#2F3136] rounded-2xl transition-all">
                 <i className="fa-solid fa-gear text-[#979797]"></i>
               </button>
             </div>
           </div>
 
-          {active === null && (
-            <BigWritingComponent
-            tasks={tasks}
-            setTasks={setTasks}
-            handleChange={handleChange}
-            handleKeyDown={handleKeyDown}
-            inputRefs={inputRefs}
-            active={active}
-            setActive={setActive}
-          />
+          {/* Barra de iconos inferior — solo visible en móvil */}
+          {!heartSectionActive && (
+            <div className="sm:hidden fixed bottom-0 left-0 right-0 h-14 bg-[#2F3136] border-t border-[#dcd9de7f] flex items-center justify-around px-4 z-50">
+              {icons.map((icon, i) => (
+                <button
+                  key={i}
+                  onClick={() => toggleButton(i)}
+                  className={`side-button ${active == i ? "button-active" : ""}`}
+                >
+                  <i className={`fa-solid ${icon}`}></i>
+                </button>
+              ))}
+              <button
+                className="side-button"
+                onClick={() => setUserBoxActive(!userBoxActive)}
+                ref={buttonRef}
+              >
+                <i className="fa-solid fa-user text-[#979797]"></i>
+              </button>
+            </div>
           )}
 
-          {active === 0 && (
-            <div className="flex flex-col items-start justify-start h-full w-full ">
-            <BigWritingComponent
-              tasks={tasks}
-              setTasks={setTasks}
-              handleChange={handleChange}
-              handleKeyDown={handleKeyDown}
-              inputRefs={inputRefs}
-              active={active}
-              setActive={setActive}
-            />
-            <BigCalendarComponent
-              active={active}
-              setActive={setActive}
-              tasks={tasks}
-              savedTasks={savedTasks}
-            />
+          {/* Área de contenido principal */}
+          <div className="flex-1 h-full overflow-auto pb-14 sm:pb-0">
+            {active === null && (
+              <BigWritingComponent
+                tasks={tasks}
+                setTasks={setTasks}
+                handleChange={handleChange}
+                handleKeyDown={handleKeyDown}
+                inputRefs={inputRefs}
+                active={active}
+                setActive={setActive}
+              />
+            )}
+
+            {active === 0 && (
+              <div className="flex flex-col items-start justify-start h-full w-full">
+                <BigWritingComponent
+                  tasks={tasks}
+                  setTasks={setTasks}
+                  handleChange={handleChange}
+                  handleKeyDown={handleKeyDown}
+                  inputRefs={inputRefs}
+                  active={active}
+                  setActive={setActive}
+                />
+                <BigCalendarComponent
+                  active={active}
+                  setActive={setActive}
+                  tasks={tasks}
+                  savedTasks={savedTasks}
+                />
+              </div>
+            )}
+
+            {active === 1 && (
+              <BigCalendarComponent
+                tasks={tasks}
+                savedTasks={savedTasks}
+                active={active}
+                setActive={setActive}
+              />
+            )}
+
+            {active === 2 && (
+              <BigTasksComponent
+                tasks={tasks}
+                setTasks={setTasks}
+                setActive={setActive}
+                activeUser={activeUser}
+                savedTasks={savedTasks}
+                setSavedTasks={setSavedTasks}
+                setTasksGeneradas={setTasksGeneradas}
+                tasksGeneradas={tasksGeneradas}
+              />
+            )}
+
+            {active === 3 && (
+              <BigHeartComponent
+                activeUser={activeUser}
+                setActiveUser={setActiveUser}
+              />
+            )}
           </div>
-          )}
 
-          {active === 1 && (
-            <BigCalendarComponent tasks={tasks} savedTasks={savedTasks} />
-          )}
-
-          {active === 2 && (
-            <BigTasksComponent
-              tasks={tasks}
-              setTasks={setTasks}
-              setActive={setActive}
-              activeUser={activeUser}
-              savedTasks={savedTasks}
-              setSavedTasks={setSavedTasks}
-              setTasksGeneradas={setTasksGeneradas}
-              tasksGeneradas={tasksGeneradas}
-            />
-          )}
-          {active === 3 && (
-            <BigHeartComponent activeUser={activeUser} setActiveUser={setActiveUser} />
-          )}
-
-         
         </div>
       </div>
     </main>
