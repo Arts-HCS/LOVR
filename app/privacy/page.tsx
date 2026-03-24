@@ -253,7 +253,7 @@ export default function PrivacyPage() {
           <ul className="lovr-footer-links">
             <li><Link href="/privacy">Privacidad</Link></li>
             <li><Link href="/terms">Términos</Link></li>
-            <li><Link href="/contact">Contacto</Link></li>
+            <li><Link href="/contacto">Contacto</Link></li>
           </ul>
           <div className="lovr-footer-note">© 2026 LOVR · All rights reserved.</div>
         </footer>
