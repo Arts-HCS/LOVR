@@ -54,9 +54,10 @@ function ExportButton({
     flow: "auth-code",
     scope:
       "https://www.googleapis.com/auth/drive.file",
-    onSuccess: (codeResponse) => handleExport(codeResponse.code),
-    onError: (err) => console.error(err),
-  });
+    prompt: "consent",
+    onSuccess: (codeResponse: any) => handleExport(codeResponse.code),
+    onError: (err: any) => console.error(err),
+  } as any);
 
   const isDisabled = type === "slide" && !slidesVersion;
 
