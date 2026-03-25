@@ -21,23 +21,22 @@ export async function POST(req: Request) {
     }
 
     const cookieStore = await cookies();
+    let credentialsReady = false;
 
-    // ── 1. Si viene un code de OAuth, intercambiarlo por tokens ──────────────
     if (code) {
       const { tokens } = await oauth2Client.getToken(code);
-      console.log("TOKENS:", { 
-        has_refresh: !!tokens.refresh_token, 
-        has_access: !!tokens.access_token 
-      });
       oauth2Client.setCredentials(tokens);
-    
+
       const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
       const { data: userInfo } = await oauth2.userinfo.get();
-    
+
       if (userInfo.email !== email) {
-        return NextResponse.json({ needsLogin: true, reason: "account_mismatch" }, { status: 401 });
+        return NextResponse.json(
+          { needsLogin: true, reason: "account_mismatch" },
+          { status: 401 }
+        );
       }
-    
+
       if (tokens.refresh_token) {
         cookieStore.set(`google_refresh_token_${email}`, tokens.refresh_token, {
           httpOnly: true,
@@ -46,51 +45,46 @@ export async function POST(req: Request) {
           path: "/",
           sameSite: "lax",
         });
-        console.log("COOKIE GUARDADA para:", email);
-      } else {
-        console.log("NO LLEGÓ refresh_token — Google no lo devolvió");
       }
-    
-      const existingRefresh = cookieStore.get(`google_refresh_token_${email}`)?.value;
-      console.log("existingRefresh después de guardar:", !!existingRefresh);
-      
-      if (!tokens.refresh_token && !existingRefresh) {
-        return NextResponse.json({ needsLogin: true, reason: "no_token_after_code" }, { status: 401 });
-      }
+
+      credentialsReady = true;
     }
-    
-    const refreshToken = cookieStore.get(`google_refresh_token_${email}`)?.value;
-    console.log("REFRESH TOKEN al leer para crear doc:", !!refreshToken);
 
-    // ── 3. Validar que el token pertenece a la cuenta correcta ────────────────
-    try {
-      oauth2Client.setCredentials({ refresh_token: refreshToken });
-      const accessTokenRes = await oauth2Client.getAccessToken();
+    if (!credentialsReady) {
+      const refreshToken = cookieStore.get(
+        `google_refresh_token_${email}`
+      )?.value;
 
-      if (!accessTokenRes.token) throw new Error("No access token");
-
-      const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
-      const { data: userInfo } = await oauth2.userinfo.get();
-
-      if (userInfo.email !== email) {
-        // El token guardado es de otra cuenta → pedir re-auth
-        cookieStore.delete(`google_refresh_token_${email}`);
+      if (!refreshToken) {
         return NextResponse.json(
-          { needsLogin: true, reason: "account_mismatch" },
+          { needsLogin: true, reason: "no_token" },
           { status: 401 }
         );
       }
-    } catch {
-      // Token inválido o expirado → pedir re-auth
-      cookieStore.delete(`google_refresh_token_${email}`);
-      return NextResponse.json(
-        { needsLogin: true, reason: "invalid_token" },
-        { status: 401 }
-      );
-    }
 
-    // 4. CONFIGURAR CREDENCIALES
-    oauth2Client.setCredentials({ refresh_token: refreshToken });
+      try {
+        oauth2Client.setCredentials({ refresh_token: refreshToken });
+        const accessTokenRes = await oauth2Client.getAccessToken();
+        if (!accessTokenRes.token) throw new Error("No access token");
+
+        const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
+        const { data: userInfo } = await oauth2.userinfo.get();
+
+        if (userInfo.email !== email) {
+          cookieStore.delete(`google_refresh_token_${email}`);
+          return NextResponse.json(
+            { needsLogin: true, reason: "account_mismatch" },
+            { status: 401 }
+          );
+        }
+      } catch {
+        cookieStore.delete(`google_refresh_token_${email}`);
+        return NextResponse.json(
+          { needsLogin: true, reason: "invalid_token" },
+          { status: 401 }
+        );
+      }
+    }
 
     const docs = google.docs({ version: "v1", auth: oauth2Client });
 
