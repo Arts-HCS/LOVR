@@ -7,11 +7,13 @@ type SlideItem = {
   content: string;
 };
 
-const oauth2Client = new google.auth.OAuth2(
-  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  "postmessage"
-);
+function createOAuthClient() {
+  return new google.auth.OAuth2(
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    "postmessage"
+  );
+}
 
 function normalizeSlidesContent(raw: unknown): SlideItem[] {
   let parsed: any = raw;
@@ -33,7 +35,9 @@ function normalizeSlidesContent(raw: unknown): SlideItem[] {
       title: String(slide?.title ?? "").trim(),
       content: String(slide?.content ?? "").trim(),
     }))
-    .filter((slide: SlideItem) => slide.title.length > 0 || slide.content.length > 0);
+    .filter(
+      (slide: SlideItem) => slide.title.length > 0 || slide.content.length > 0
+    );
 }
 
 function chunkArray<T>(arr: T[], size: number): T[][] {
@@ -44,13 +48,20 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
   return chunks;
 }
 
-function getPlaceholderShapeId(
-  slide: any,
-  types: string[]
-): string | undefined {
-  return slide?.pageElements?.find(
-    (el: any) => types.includes(el?.shape?.placeholder?.type)
+function getPlaceholderShapeId(slide: any, types: string[]): string | undefined {
+  return slide?.pageElements?.find((el: any) =>
+    types.includes(el?.shape?.placeholder?.type)
   )?.objectId;
+}
+
+function getShapeTextLength(shape: any): number {
+  const textElements = shape?.shape?.text?.textElements;
+  if (!Array.isArray(textElements)) return 0;
+
+  return textElements.reduce((total: number, el: any) => {
+    const content = el?.textRun?.content;
+    return total + (typeof content === "string" ? content.length : 0);
+  }, 0);
 }
 
 export async function POST(req: Request) {
@@ -59,10 +70,15 @@ export async function POST(req: Request) {
 
     const email = activeUser?.email;
     if (!email) {
-      return NextResponse.json({ error: "No user email provided" }, { status: 400 });
+      return NextResponse.json(
+        { error: "No user email provided" },
+        { status: 400 }
+      );
     }
 
+    const oauth2Client = createOAuthClient();
     const cookieStore = await cookies();
+    let credentialsReady = false;
 
     if (code) {
       const { tokens } = await oauth2Client.getToken(code);
@@ -87,39 +103,54 @@ export async function POST(req: Request) {
           sameSite: "lax",
         });
       }
+
+      credentialsReady = true;
     }
 
-    const refreshToken = cookieStore.get(`google_refresh_token_${email}`)?.value;
+    if (!credentialsReady) {
+      const refreshToken = cookieStore.get(`google_refresh_token_${email}`)?.value;
 
-    if (!refreshToken) {
-      return NextResponse.json({ needsLogin: true, reason: "no_token" }, { status: 401 });
-    }
-
-    try {
-      oauth2Client.setCredentials({ refresh_token: refreshToken });
-      const accessTokenRes = await oauth2Client.getAccessToken();
-
-      if (!accessTokenRes.token) throw new Error("No access token");
-
-      const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
-      const { data: userInfo } = await oauth2.userinfo.get();
-
-      if (userInfo.email !== email) {
-        cookieStore.delete(`google_refresh_token_${email}`);
+      if (!refreshToken) {
         return NextResponse.json(
-          { needsLogin: true, reason: "account_mismatch" },
+          { needsLogin: true, reason: "no_token" },
           { status: 401 }
         );
       }
-    } catch {
-      cookieStore.delete(`google_refresh_token_${email}`);
+
+      try {
+        oauth2Client.setCredentials({ refresh_token: refreshToken });
+
+        const accessTokenRes = await oauth2Client.getAccessToken();
+        if (!accessTokenRes.token) throw new Error("No access token");
+
+        const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
+        const { data: userInfo } = await oauth2.userinfo.get();
+
+        if (userInfo.email !== email) {
+          cookieStore.delete(`google_refresh_token_${email}`);
+          return NextResponse.json(
+            { needsLogin: true, reason: "account_mismatch" },
+            { status: 401 }
+          );
+        }
+
+        credentialsReady = true;
+      } catch {
+        cookieStore.delete(`google_refresh_token_${email}`);
+        return NextResponse.json(
+          { needsLogin: true, reason: "invalid_token" },
+          { status: 401 }
+        );
+      }
+    }
+
+    if (!credentialsReady) {
       return NextResponse.json(
-        { needsLogin: true, reason: "invalid_token" },
+        { needsLogin: true, reason: "no_credentials" },
         { status: 401 }
       );
     }
 
-    oauth2Client.setCredentials({ refresh_token: refreshToken });
     const slidesApi = google.slides({ version: "v1", auth: oauth2Client });
 
     const presentation = await slidesApi.presentations.create({
@@ -139,10 +170,11 @@ export async function POST(req: Request) {
       });
     }
 
-    // Leer la presentación inicial para obtener el ID de la primera diapositiva
-    const initialPresentation = await slidesApi.presentations.get({ presentationId });
-    const defaultSlideId = initialPresentation.data.slides?.[0]?.objectId;
+    const initialPresentation = await slidesApi.presentations.get({
+      presentationId,
+    });
 
+    const defaultSlideId = initialPresentation.data.slides?.[0]?.objectId;
     if (!defaultSlideId) {
       throw new Error("No se pudo obtener la diapositiva inicial");
     }
@@ -164,13 +196,18 @@ export async function POST(req: Request) {
       });
     }
 
-    const updatedPresentation = await slidesApi.presentations.get({ presentationId });
+    const updatedPresentation = await slidesApi.presentations.get({
+      presentationId,
+    });
 
     const slidesById = new Map<string, any>(
-      (updatedPresentation.data.slides ?? []).map((slide: any) => [slide.objectId, slide])
+      (updatedPresentation.data.slides ?? []).map((slide: any) => [
+        slide.objectId,
+        slide,
+      ])
     );
 
-    const insertRequests: any[] = [];
+    const requests: any[] = [];
 
     slidesData.forEach((item, index) => {
       const slideId = index === 0 ? defaultSlideId : `generated_slide_${index}`;
@@ -188,40 +225,65 @@ export async function POST(req: Request) {
         "SUBTITLE",
       ]);
 
-      if (titleShapeId && item.title) {
-        insertRequests.push({
-          deleteText: {
-            objectId: titleShapeId,
-            textRange: { type: "ALL" },
-          },
-        });
+      const titleShape = currentSlide.pageElements?.find(
+        (el: any) => el.objectId === titleShapeId
+      );
+      const bodyShape = currentSlide.pageElements?.find(
+        (el: any) => el.objectId === bodyShapeId
+      );
 
-        insertRequests.push({
+      if (titleShapeId && item.title) {
+        const titleLength = getShapeTextLength(titleShape);
+
+        if (titleLength > 0) {
+          requests.push({
+            deleteText: {
+              objectId: titleShapeId,
+              textRange: {
+                type: "FIXED_RANGE",
+                startIndex: 0,
+                endIndex: titleLength,
+              },
+            },
+          });
+        }
+
+        requests.push({
           insertText: {
             objectId: titleShapeId,
+            insertionIndex: 0,
             text: item.title,
           },
         });
       }
 
       if (bodyShapeId && item.content) {
-        insertRequests.push({
-          deleteText: {
-            objectId: bodyShapeId,
-            textRange: { type: "ALL" },
-          },
-        });
+        const bodyLength = getShapeTextLength(bodyShape);
 
-        insertRequests.push({
+        if (bodyLength > 0) {
+          requests.push({
+            deleteText: {
+              objectId: bodyShapeId,
+              textRange: {
+                type: "FIXED_RANGE",
+                startIndex: 0,
+                endIndex: bodyLength,
+              },
+            },
+          });
+        }
+
+        requests.push({
           insertText: {
             objectId: bodyShapeId,
+            insertionIndex: 0,
             text: item.content,
           },
         });
       }
     });
 
-    for (const chunk of chunkArray(insertRequests, 50)) {
+    for (const chunk of chunkArray(requests, 50)) {
       await slidesApi.presentations.batchUpdate({
         presentationId,
         requestBody: { requests: chunk },
