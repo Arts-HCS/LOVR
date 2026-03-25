@@ -25,45 +25,42 @@ export async function POST(req: Request) {
     // ── 1. Si viene un code de OAuth, intercambiarlo por tokens ──────────────
     if (code) {
       const { tokens } = await oauth2Client.getToken(code);
+      console.log("TOKENS:", { 
+        has_refresh: !!tokens.refresh_token, 
+        has_access: !!tokens.access_token 
+      });
       oauth2Client.setCredentials(tokens);
-
+    
       const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
       const { data: userInfo } = await oauth2.userinfo.get();
-
+    
       if (userInfo.email !== email) {
-        return NextResponse.json(
-          { needsLogin: true, reason: "account_mismatch" },
-          { status: 401 }
-        );
+        return NextResponse.json({ needsLogin: true, reason: "account_mismatch" }, { status: 401 });
       }
-
+    
       if (tokens.refresh_token) {
         cookieStore.set(`google_refresh_token_${email}`, tokens.refresh_token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           maxAge: 60 * 60 * 24 * 30,
           path: "/",
-          sameSite: "lax", // ← añade esto para evitar problemas con cookies en redirects
+          sameSite: "lax",
         });
+        console.log("COOKIE GUARDADA para:", email);
+      } else {
+        console.log("NO LLEGÓ refresh_token — Google no lo devolvió");
       }
-
-      // ← Si ya tenemos credenciales válidas desde el code, continúa directo
-      //   sin pasar por la validación de refresh_token de abajo
-      const existingRefresh = cookieStore.get(
-        `google_refresh_token_${email}`
-      )?.value;
+    
+      const existingRefresh = cookieStore.get(`google_refresh_token_${email}`)?.value;
+      console.log("existingRefresh después de guardar:", !!existingRefresh);
+      
       if (!tokens.refresh_token && !existingRefresh) {
-        return NextResponse.json(
-          { needsLogin: true, reason: "no_token_after_code" },
-          { status: 401 }
-        );
+        return NextResponse.json({ needsLogin: true, reason: "no_token_after_code" }, { status: 401 });
       }
     }
-
-    // ── 2. Obtener el refresh token de este usuario específico ────────────────
-    const refreshToken = cookieStore.get(
-      `google_refresh_token_${email}`
-    )?.value;
+    
+    const refreshToken = cookieStore.get(`google_refresh_token_${email}`)?.value;
+    console.log("REFRESH TOKEN al leer para crear doc:", !!refreshToken);
 
     // ── 3. Validar que el token pertenece a la cuenta correcta ────────────────
     try {
