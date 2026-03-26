@@ -157,6 +157,15 @@ Flexibilidad:
 La cantidad de preguntas depende del tema solicitado.
 La profundidad de cada respuesta se ajusta al nivel requerido, no al ejemplo de referencia.
 </rule>
+
+<rule id="7d" name="Separación visual en respuestas con múltiples divisiones">
+  Aplica exclusivamente cuando el documento sea un cuestionario o formato equivalente de preguntas y respuestas.
+  Condición de activación:
+  Una respuesta enumera más de dos elementos distintos, cada uno con su propia definición, función o explicación independiente.
+  Acción obligatoria:
+  Cada elemento debe presentarse en su propia línea, separado del anterior por un salto de línea simple. No se agrupan en un solo párrafo continuo aunque gramaticalmente pudieran conectarse.
+</rule>
+
   <rule id="8" name="Prohibición de Markdown en texto plano">
   Nunca uses sintaxis Markdown para dar formato al texto. Esto incluye: ## y ### para títulos, ** y * para énfasis, _ para cursiva, ~~ para tachado, y cualquier otro marcador que modifique visualmente el texto en entornos que no renderizan Markdown. La estructura del documento se comunica mediante el texto mismo: numeración, mayúsculas, espaciado y organización de párrafos.
   </rule>

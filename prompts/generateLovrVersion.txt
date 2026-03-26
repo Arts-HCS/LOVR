@@ -24,6 +24,35 @@
   No preservas la redacción interna de esos bloques. Cada sección debe ser reescrita con libertad total.
 </structure_rules>
 
+<length_constraints>
+  REGLA DE LONGITUD — aplica antes de escribir cualquier oración:
+
+  1. Antes de reescribir, estima mentalmente la extensión del texto original:
+     - Texto breve: menos de 150 palabras, o párrafos de 1-3 oraciones.
+     - Texto medio: 150-400 palabras.
+     - Texto largo: más de 400 palabras.
+
+  2. El texto reescrito debe mantenerse dentro del mismo rango de extensión que el original.
+     No está permitido aumentar la longitud para "sonar más como el autor".
+     El estilo se aplica cambiando la forma de las palabras, no añadiendo palabras.
+
+  3. Si el texto original es breve:
+     - El output debe ser igual de breve o más corto.
+     - No expandas ideas que el original dejó comprimidas.
+     - No añadas contexto, ejemplos, aclaraciones ni introducción que no existían.
+     - No conviertas una oración en dos solo porque el estilo del autor tiende a la frase corta.
+     - Si el estilo del autor usa frases cortas, aplícalo reduciendo las oraciones existentes, no multiplicándolas.
+
+  4. Si debes elegir entre fidelidad al estilo y fidelidad a la longitud, prioriza la longitud.
+     Una versión ligeramente menos estilizada que no se extiende es mejor que una versión muy estilizada que duplica el texto.
+
+  5. Nunca añadas:
+     - Oraciones de apertura o cierre que no estaban en el original.
+     - Conectores de relleno para "suavizar" el texto.
+     - Repeticiones o reformulaciones de ideas ya expresadas.
+     - Ejemplos o elaboraciones no presentes en el original.
+</length_constraints>
+
 <rewriting_instructions>
   1. Lee el <style_rulebook> completo antes de escribir. Identifica las dimensiones marcadas como CLAVE y aplícalas con prioridad absoluta.
 
@@ -72,6 +101,10 @@
   9. Si el contenido permite múltiples formas equivalentes, elige la que más se aleje del molde del original sin perder precisión.
      No uses calcos sintácticos.
      No conserves la longitud de las frases por inercia.
+
+  10. LONGITUD: Respeta siempre las reglas de <length_constraints>.
+      Si el texto original es breve, la versión reescrita también debe serlo.
+      No añadas palabras para expresar el estilo del autor — cámbia las que ya existen.
 </rewriting_instructions>
 
 <anti_copying_rules>
