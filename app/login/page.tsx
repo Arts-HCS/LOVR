@@ -104,11 +104,29 @@ export default function Login(){
           <LoginForm />
 
           <Link 
-            href="/register"
-            className="py-4 bg-gray-300 px-6 rounded-2xl mt-10 w-full xl:w-[70%] text-center text-xl hover:bg-[#a6b1bc6b] transition-all hover:px-8 hover:scale-105 text-(--black-color)"
-          >
-            Crear una cuenta
-          </Link>
+  href="/register"
+  className="
+    py-4 px-6 mt-10 w-full xl:w-[70%]
+    text-center text-xl font-medium
+    rounded-2xl
+
+    text-white/80
+    bg-[#111213aa]
+    
+    border border-white/10
+
+    backdrop-blur-md
+    transition-all duration-300
+
+    hover:bg-white/10
+    hover:border-white/20
+    hover:text-white
+
+    active:scale-95
+  "
+>
+  Crear una cuenta
+</Link>
 
         </div>
 

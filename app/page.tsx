@@ -190,7 +190,7 @@ export default function LovrLanding() {
             <li><Link href={"/privacy"}>Privacidad</Link></li>
             <li><Link href={"/terms"}>Términos</Link></li>
             <li><Link href={"/contacto"}>Contacto</Link></li>
-            <Link href="/register" className="lovr-nav-cta">Comenzar</Link>
+            <Link href="/register" className="lovr-nav-cta inside">Comenzar</Link>
           </ul>
           <Link href="/register" className="lovr-nav-cta">Comenzar</Link>
           <label htmlFor="sidebar-active" className='lovr-nav-open'>
@@ -267,6 +267,17 @@ export default function LovrLanding() {
               </div>
             ))}
           </div>
+        </section>
+        
+        <section className="s-hero">
+          <div className="s-hero-grid" />
+          <h1 className="s-hero-title">
+            Desarrollado <br /> por y para<br />
+            <em>estudiantes</em>
+          </h1>
+          <p className="s-hero-sub">
+            Lidiar con el estrés escolar, recordar pendientes y tener que trabajar en cada tarea, una a la vez, es cosa del pasado...
+          </p>
         </section>
 
         <section className="lovr-statement lovr-reveal">

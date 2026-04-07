@@ -1,4 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&family=Outfit:wght@300;400;500;600&display=swap');
+
 
 .lovr-root *, .lovr-root *::before, .lovr-root *::after {
   box-sizing: border-box; margin: 0; padding: 0;
@@ -18,6 +20,8 @@
   --gray:        #827989;
   --border:      #1e1f25;
   --border2:     #2a2b30;
+  --rose-bright: #e07090;
+  --purple:      #8448ac;
 }
 
 .lovr-root {
@@ -171,6 +175,10 @@
   box-shadow: 0 0 24px var(--primary-dim);
 }
 
+.inside{
+  display: none;
+}
+
 /* ── HERO ── */
 .lovr-hero {
   min-height: 100vh;
@@ -220,6 +228,7 @@
   line-height: 1.0;
   letter-spacing: -0.02em;
   color: var(--white);
+  margin-top: 4rem;
   margin-bottom: 1.8rem;
   opacity: 0;
   animation: lovrFadeUp 1s 0.8s ease forwards;
@@ -757,6 +766,47 @@
   .lovr-footer-links { flex-wrap: wrap; justify-content: center; }
 }
 
+
+/*Por y para*/
+.s-hero {
+  min-height: 50dvh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  padding: 8rem 2rem 6rem;
+  position: relative; overflow: hidden;
+}
+/* subtle grid */
+.s-hero-grid {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(201,96,122,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,96,122,.03) 1px, transparent 1px);
+  background-size: 68px 68px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 10%, transparent 100%);
+}
+.s-hero-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(3rem, 8.5vw, 7rem);
+  line-height: 1.0; color: var(--white);
+  margin-bottom: 1.6rem; max-width: 880px;
+  opacity: 0; animation: fadeUp 1s .5s ease forwards;
+}
+.s-hero-title em {
+  font-style: italic;
+  background: linear-gradient(120deg, var(--rose-bright), var(--purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.s-hero-sub {
+  font-size: clamp(.95rem, 1.8vw, 1.1rem); font-weight: 300;
+  color: var(--white-dim); max-width: 500px; line-height: 1.85;
+  opacity: 0; animation: fadeUp .8s .7s ease forwards;
+}
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+
+
 @media screen and (max-width: 580px){
 
     .lovr-nav-logo{
@@ -809,8 +859,8 @@
 
     }
 
-    .lovr-cta-arrow{
-        display: none;
+    .inside{
+      display: block;
     }
 }
 
