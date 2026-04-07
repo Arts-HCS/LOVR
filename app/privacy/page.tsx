@@ -203,12 +203,6 @@ export default function PrivacyPage() {
         </>
       ),
     },
-    {
-      title: 'Cambios a esta política',
-      content: (
-        <p>Cuando realicemos cambios significativos a esta política, te notificaremos por correo electrónico con al menos 15 días de anticipación. Los cambios menores serán reflejados en esta página con la fecha de última actualización visible en el encabezado.</p>
-      ),
-    },
   ];
 
   return (
@@ -231,7 +225,7 @@ export default function PrivacyPage() {
         <div className="page-hero">
           <div className="page-tag">Legal</div>
           <h1 className="page-title">Política de <em>privacidad</em></h1>
-          <p className="page-meta">Última actualización: 19 de marzo de 2026 &nbsp;·&nbsp; Versión 1.0</p>
+          <p className="page-meta">Última actualización: 19 de marzo de 2026 <br /> <b>Versión</b> 1.0</p>
         </div>
 
         {/* CONTENT */}

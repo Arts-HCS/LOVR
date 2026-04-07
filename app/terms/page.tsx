@@ -190,7 +190,8 @@ export default function TermsPage() {
         <div className="page-hero">
           <div className="page-tag">Legal</div>
           <h1 className="page-title">Términos de <em>servicio</em></h1>
-          <p className="page-meta">Última actualización: 21 de marzo de 2026 &nbsp;·&nbsp; Versión 1.0</p>
+          <p className="page-meta">Última actualización: 28 de marzo de 2026 <br />
+          <b>Versión</b> 1.2</p>
         </div>
 
         {/* TWO-COLUMN LAYOUT */}

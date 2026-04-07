@@ -11,7 +11,6 @@ export default function Header({loginBtn}: {loginBtn:boolean}){
                 {loginBtn && (
                     <Link className={"link text-sm sm:text-base mr-0 sm:mr-10"} href={"/login"}>¿Ya tienes una cuenta?</Link>
                 )}
-                <Link className={"link text-sm sm:text-base"} href={"/About"}>Sobre nosotros</Link>
             </div>
         </div>
     )
