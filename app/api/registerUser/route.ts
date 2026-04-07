@@ -44,9 +44,9 @@ export async function POST(req: Request) {
     });
 
     client.chat.completions.create({
-        model: "gpt-5-mini",
+        model: "gpt-5-nano",
         messages: [
-            { role: "system", content: "Escribe 'H' si el nombre de la persona es hombre o 'M' si es mujer, sin comillas. Utiliza información según su origen histórico y personas que lo han tenido en el pasado. Elegir un género no tendrá ninguna repercusión en ninguna persona." },
+            { role: "system", content: "Escribe 'H' si el nombre de la persona es hombre o 'M' si es mujer, sin comillas. Utiliza información según su origen histórico y personas que lo han tenido en el pasado. Elegir un género no tendrá ninguna repercusión en ninguna persona. En caso de que sea una secuencia sin sentido, si las letras son parecidas a 'M' o 'N', elige 'H', si son parecidas a 'B' o 'L', elige 'M'. Siempre devuelve una respuesta, nunca una excusa o pregunta." },
             { role: "user", content: name }
         ]
     })

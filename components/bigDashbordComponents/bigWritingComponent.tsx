@@ -34,7 +34,7 @@ export default function BigWritingComponent(
     }
 
     return(
-        <section className={`flex flex-col items-center justify-end h-full w-full overflow-scroll ${active ? "flex-2 pb-10": ""}`}>
+        <section className={`flex flex-col items-center bg-[#202225] justify-end h-full w-full overflow-scroll ${active ? "flex-2 pb-10": ""}`}>
             <h3 className={`mb-11 text-2xl sm:text-3xl font-normal text-[#dcd9deda] ${(tasks.length > 2 && active) ? "hidden" : ""}`}>
                 El mundo es tuyo
             </h3>

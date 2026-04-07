@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   title: "LOVR",
   description: "Agenda tus actividades, recuérdalas, y lleva un progreso de todas al mismo. El nuevo estándar.",
   icons: {
-    icon: "./duck_logo.png"
+    icon: "./lovr.png"
   }
 };
 

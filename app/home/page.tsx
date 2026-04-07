@@ -9,6 +9,7 @@ import BigWritingComponent from "@/components/bigDashbordComponents/bigWritingCo
 import BigTasksComponent from "@/components/bigDashbordComponents/bigTasksComponent";
 import BigCalendarComponent from "@/components/bigDashbordComponents/bigCalendarComponent";
 import BigHeartComponent from "@/components/bigDashbordComponents/bigHeartComponent";
+import BigConfiguration from "@/components/bigDashbordComponents/bigConfiguration";
 import UserBox from "@/components/ui/userBox";
 
 export interface Task {
@@ -265,7 +266,7 @@ export default function Home() {
     }
   };
 
-  const icons = ["fa-house", "fa-calendar", "fa-list-check", "fa-dna"];
+  const icons = ["fa-house", "fa-calendar", "fa-list-check", "fa-heart"];
 
   const [active, setActive] = useState<number | null>(0);
 
@@ -404,7 +405,7 @@ export default function Home() {
               >
                 <i className="fa-solid fa-user text-[#979797]"></i>
               </button>
-              <button className="w-8 h-8 text-[18px] flex items-center justify-center p-6 hover:bg-[#2F3136] hover:shadow-[0_0_10px_#2F3136] rounded-2xl transition-all">
+              <button onClick={()=> toggleButton(4)} className={`w-8 h-8 text-[18px] flex items-center justify-center p-6 hover:bg-[#2F3136] hover:shadow-[0_0_10px_#2F3136] rounded-2xl transition-all cursor-pointer ${active === 4 ? "bg-[#7d7d8143]": ""}`}>
                 <i className="fa-solid fa-gear text-[#979797]"></i>
               </button>
             </div>
@@ -492,6 +493,13 @@ export default function Home() {
               <BigHeartComponent
                 activeUser={activeUser}
                 setActiveUser={setActiveUser}
+              />
+            )}
+
+            {active === 4 && (
+              <BigConfiguration
+                activeUser={activeUser}
+                
               />
             )}
           </div>
