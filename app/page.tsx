@@ -292,7 +292,6 @@ export default function LovrLanding() {
           </p>
           <Link href="/register" className="lovr-cta-btn">
             Comienza a enamorarte
-            <span className="lovr-cta-arrow">→</span>
           </Link>
         </section>
 
