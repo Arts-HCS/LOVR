@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import "./landing.css"
+import Image from 'next/image';
 
 
 /* ─────────────────────────────────────────
@@ -179,7 +180,9 @@ export default function LovrLanding() {
       <div className="lovr-wrapper">
 
         <nav className={`lovr-nav${scrolled ? ' scrolled' : ''}`}>
-          <div className="lovr-nav-logo">LOVR</div>
+          <div className="lovr-nav-logo">
+            LOVR
+          </div>
           <input type="checkbox" id='sidebar-active' />
           <label id="overlay" htmlFor="sidebar-active"></label>
 
@@ -296,7 +299,9 @@ export default function LovrLanding() {
         </section>
 
         <footer className="lovr-footer">
-          <div className="lovr-footer-logo">LOVR</div>
+          <div className="lovr-footer-logo">
+            <Image src="/lovr.png" alt="Logo" width={70} height={70} className="lovr-nav-logo-img"></Image>
+          </div>
           <ul className="lovr-rfooter-links">
             <li><Link href={"/privacy"}>Privacidad</Link></li>
             <li><Link href={"/terms"}>Términos</Link></li>

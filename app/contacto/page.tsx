@@ -272,7 +272,7 @@ export default function ContactPage() {
             Sin formularios, sin tickets, sin espera innecesaria. Escríbenos cuando sea necesario.
           </p> <br />
           <p className="page-sub">
-            ¿Te apasiona la programación o el diseño? ¡LOVR sigue en constante y desarrollo y nos encantaría conocer tu opinión!
+            ¿Te apasiona la programación o el diseño? ¡LOVR sigue en constante y desarrollo y nos encantaría conocerte!
           </p>
         </div>
 
