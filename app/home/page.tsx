@@ -355,7 +355,7 @@ export default function Home() {
             </button>
 
             {headerMenuActive && (
-              <div className="absolute top-full left-0 mt-1 bg-[#2F3136] rounded-lg shadow-lg border border-[#ffffff10] z-50 min-w-[150px] sm:min-w-[170px] overflow-hidden">
+              <div className="absolute top-full left-0 mt-1 bg-[#2F3136] rounded-lg shadow-lg border border-[#ffffff10] z-50 min-w-37.5 sm:min-w-42.5 overflow-hidden">
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-3 px-4 py-2.5 text-[#f04747] hover:bg-[#3a3d44] transition-all cursor-pointer text-[14px] sm:text-[16px]"
