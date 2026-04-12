@@ -291,7 +291,7 @@
     top: -50%;
     width: 70%;
     height: 100%;
-    background: linear-gradient(150deg, #A8859B, #BCBABB);
+    background: linear-gradient(150deg, #b579a2, #c9a8b8);
     filter: blur(100px);
     opacity: 0.6;
     z-index: -1;
