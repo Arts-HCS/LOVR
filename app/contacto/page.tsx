@@ -269,10 +269,10 @@ export default function ContactPage() {
           <div className="page-tag">Contacto</div>
           <h1 className="page-title">Hablemos <em>directamente</em></h1>
           <p className="page-sub">
-            Sin formularios, sin tickets, sin espera innecesaria. Escríbenos cuando sea necesario.
+            Sin formularios, sin bots de respuesta automática, sin espera innecesaria. Escríbenos cuando sea necesario.
           </p> <br />
           <p className="page-sub">
-            ¿Te apasiona la programación o el diseño? ¡LOVR sigue en constante y desarrollo y nos encantaría conocerte!
+            ¿Te apasiona la programación o el diseño? ¡LOVR sigue en constante desarrollo y nos encantaría conocerte!
           </p>
         </div>
 
@@ -313,11 +313,8 @@ export default function ContactPage() {
             </div>
             <div className="card-title">Trabaja con nosotros</div>
             <p className="card-body">
-              ¿Quieres ser parte del equipo? Cuéntanos en qué área destacas y qué te emociona de LOVR.
+              ¿Quieres ser parte del equipo? Cuéntanos en qué área destacas y qué te emociona de LOVR. <br /> Por supuesto: no necesitas CV ni experiencia previa.
             </p>
-            <a href="mailto:artssc925@gmail.com?subject=Quiero%20trabajar%20en%20LOVR" className="card-link">
-              Escríbenos
-            </a>
           </div>
 
           <div className="contact-card">
@@ -331,9 +328,6 @@ export default function ContactPage() {
             <p className="card-body">
               Abiertos a alianzas, integraciones y proyectos conjuntos. Si tienes una idea, queremos escucharla.
             </p>
-            <a href="mailto:artssc925@gmail.com?subject=Propuesta%20de%20colaboraci%C3%B3n" className="card-link">
-              Proponer algo
-            </a>
           </div>
 
         </div>

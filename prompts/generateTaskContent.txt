@@ -57,16 +57,20 @@ ACCIÓN: Respeta la jerarquía propuesta y rellena cada sección con contenido d
 </context_type>
 
 <context_type id="implicit_only">
-SEÑALES: No hay cuerpo, o el cuerpo es tan mínimo que no aporta estructura ni contenido.
-ACCIÓN: Deduce el tema real detrás de las instrucciones. Construye un documento profesional y completo sin inventar datos específicos como nombres propios, cifras o eventos. Generaliza donde falte información concreta.
+Cuando el input solo aporte contexto y no indique explícitamente qué hacer, primero identifica qué tipo de texto es: cuento, explicación, ensayo, poema, diálogo, lista, investigación, fragmento técnico, etc., independientemente del idioma.
+Después pregúntate qué suelen pedir normalmente los usuarios sobre un texto de ese tipo: resumen, feedback, reescritura, análisis, corrección, continuación, explicación, clasificación u otro uso frecuente.
+Responde con la salida más probable o, si hay dos interpretaciones claramente dominantes, con las dos más probables y nada más.
+No generes más de dos salidas posibles.
+No inventes una intención débil si existe una dominante clara.
+Si el tipo de texto es reconocible pero la intención sigue siendo muy incierta, ofrece la opción más funcional y neutral posible.
 </context_type>
 
 <context_type id="ambiguous_or_nonsensical">
 SEÑALES: El input contiene elementos sin relación clara entre sí o no permite inferir una intención dominante.
-ACCIÓN: No asumas una intención específica ni inventes contenido. Primero intenta resolver la intención usando el nombre de la tarea y las instrucciones disponibles. Si sigue habiendo ambigüedad, produce la salida más probable, neutral y funcional posible, basada solo en lo disponible.
+ACCIÓN: Primero identifica el tipo de texto o material recibido. Luego infiere la acción más probable que el usuario suele pedir para ese tipo de contenido. Si hay una sola intención dominante, ejecútala. Si hay dos intenciones claramente más probables, responde con ambas. No produzcas más de dos resultados. No asumas una intención débil si el contexto permite una inferencia más fuerte.
 </context_type>
 
-Si el cuerpo combina señales de más de una categoría, aplica ambas lógicas en el orden que mejor sirva al output final.
+Si no hay instrucción explícita, la inferencia se basa primero en el tipo de texto y después en la intención más probable asociada a ese tipo.
 </intent_inference>
 
 <output_rules>
@@ -101,9 +105,9 @@ No uses subtítulos salvo que sean realmente necesarios para separar ideas o con
     Esta regla se aplica antes de cualquier otro procesamiento.
   </rule>
 
-  <rule id="2" name="Trasvase estructural en referencias de estilo">
-    Cuando el tipo sea STYLE_REFERENCE: el contenido cambia completamente, la arquitectura se conserva. Si el ejemplo usa tres secciones con subtítulos y cierra con una reflexión, el nuevo documento hace lo mismo, adaptado al nuevo tema.
-  </rule>
+  <rule id="2" name="Trasvase estructural exacto en referencias de estilo">
+Cuando el tipo sea STYLE_REFERENCE, conserva exactamente la estructura del modelo: orden de secciones, mismos niveles de encabezado, misma presencia o ausencia de subtítulos y misma lógica de cierre. No agregues subtítulos, divisiones, numeración o apartados que no existan en el modelo original. Si el ejemplo está redactado como prosa continua, el nuevo texto también debe ir en prosa continua. Solo cambia el contenido; no cambies la arquitectura.
+</rule>
 
   <rule id="2b" name="Filtrado de elementos estructurales sin contenido real">
     Cuando apliques una referencia de estilo o estructura, no reproduzcas elementos que dependan de contenido inexistente en el nuevo contexto.

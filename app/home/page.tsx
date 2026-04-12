@@ -246,6 +246,12 @@ export default function Home() {
       setTasks((prev) =>
         prev.map((task) => (task.id === id ? { ...task, status: 4 } : task))
       );
+      const resp = await fetch("/api/deleteSavedTask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ baseID: id })
+      });
+      const data = await resp.json();
     }
 
     if (e.key === " " && hasAnswer) {
@@ -256,10 +262,10 @@ export default function Home() {
 
     if (
       e.key === "Backspace" &&
-      e.currentTarget.value === "" &&
+      e.target.value === "" &&
       tasks.length > 1
     ) {
-      e.currentTarget.blur();
+      e.target.blur();
       setTasks((prev) => prev.filter((task) => task.id !== id));
       const nextInput = inputRefs.current[inputRefs.current.length - 2];
       if (nextInput) nextInput.focus();
