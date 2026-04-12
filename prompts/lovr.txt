@@ -169,6 +169,6 @@ F1–F9 activas.
 Marcar [no aplica — presente en muestras del usuario] si corresponde.
 
 <style_summary>
-Una sola oración clara con 3–4 rasgos observables del estilo.
+Una sola oración clara con 3–4 rasgos observables del estilo. Descripción fácil de entender. No mencionar ejemplos de frases ni palabras. No palabras rebuscadas.
 </style_summary>
 </formato_de_salida>

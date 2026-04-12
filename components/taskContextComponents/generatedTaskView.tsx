@@ -91,10 +91,8 @@ export default function GeneratedTaskView({
   }, [id, generated]);
 
   return (
-    /* Ocupa todo el espacio que le da el padre (fixed inset-0) */
     <div className="flex-1 min-w-0 h-full bg-[#F0F4F9] border-l border-t border-[#3B3440] flex flex-col overflow-hidden">
 
-      {/* Header */}
       <div className="text-[18px] sm:text-[22px] bg-[#d1d9e8] h-12 text-[#1f1f1e] border-b border-[#3A3F41] flex items-center justify-between px-4 sm:px-6 shrink-0 w-full">
         <span className="truncate">{title}</span>
         <button
@@ -104,19 +102,16 @@ export default function GeneratedTaskView({
           <i className="fa-solid fa-xmark text-xl"></i>
         </button>
       </div>
-
-      {/* Cuerpo: textarea + panel lateral */}
+      
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
 
-        {/* Textarea — ocupa todo el ancho disponible */}
         <textarea
-          className="flex-1 min-h-0 bg-[#FFFFFF] outline-none border-0 border-r border-[#3A3E41] text-left resize-none pt-8 sm:pt-16 px-4 sm:px-12 text-[#1d1d1d] text-[14px] sm:text-[15px] shadow-[inset_0_4px_30px_rgba(0,0,0,0.05)] pb-8 w-full"
+          className="flex-1 min-h-0 bg-[#FFFFFF] outline-none border-0 border-r border-[#3A3E41] text-left resize-none pt-8 sm:pt-16 px-4 sm:px-12 text-[#1d1d1d] text-[14px] sm:text-[15.5px] font-normal shadow-[inset_0_4px_30px_rgba(0,0,0,0.05)] pb-8 w-full"
           id="generatedAnswer"
           value={generatedTask}
           readOnly
         />
 
-        {/* Panel lateral: Exportar + Versiones */}
         <div className="shrink-0 w-full lg:w-56 xl:w-64 flex flex-row lg:flex-col overflow-x-auto lg:overflow-y-auto lg:overflow-x-hidden border-t lg:border-t-0 lg:border-l border-[#3A3E41]">
 
           {/* Exportar */}

@@ -5,10 +5,6 @@ import { useEffect, useRef, useState } from 'react';
 import "./landing.css"
 import Image from 'next/image';
 
-
-/* ─────────────────────────────────────────
-   Particle class (canvas)
-───────────────────────────────────────── */
 const COLORS = ['#595fb1', '#8448ac', '#eb6f6f', '#827989'];
 
 class Particle {
@@ -49,9 +45,6 @@ class Particle {
   }
 }
 
-/* ─────────────────────────────────────────
-   Data
-───────────────────────────────────────── */
 const STRIP_ITEMS = [
   'Lenguaje natural', 'Sin prompts', 'Documentos listos',
   'Replica tu estilo', 'Presentaciones', 'Formato académico',
@@ -61,9 +54,6 @@ const STRIP_ITEMS = [
   'Sin estructura', 'Exporta al instante',
 ];
 
-/* ─────────────────────────────────────────
-   Component
-───────────────────────────────────────── */
 export default function LovrLanding() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cursorRef = useRef<HTMLDivElement>(null);
@@ -73,14 +63,14 @@ export default function LovrLanding() {
   const [inputVal,  setInputVal]  = useState('');
   const [scrolled,  setScrolled]  = useState(false);
 
-  /* ── Scroll nav ── */
+  /* ── Scroll ── */
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  /* ── Custom cursor ── */
+  /* ── Cursor ── */
   useEffect(() => {
     const cur  = cursorRef.current;
     const ring = ringRef.current;
@@ -110,7 +100,7 @@ export default function LovrLanding() {
     return () => { cancelAnimationFrame(raf); document.removeEventListener('mousemove', onMove); };
   }, []);
 
-  /* ── Particle canvas ── */
+  /* ── Particulas ── */
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -279,7 +269,7 @@ export default function LovrLanding() {
             <em>estudiantes</em>
           </h1>
           <p className="s-hero-sub">
-            Lidiar con el estrés escolar, recordar pendientes y tener que trabajar en cada tarea, una a la vez, es cosa del pasado...
+          Una herramienta creada en tu mismo entorno. Nadie entiende mejor lo que necesitas que quien lo vive contigo.
           </p>
         </section>
 

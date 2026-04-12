@@ -50,6 +50,7 @@
   transition: transform 0.15s ease, background 0.2s ease;
   mix-blend-mode: difference;
 }
+
 .lovr-cursor-ring {
   position: fixed;
   width: 36px; height: 36px;
@@ -97,7 +98,6 @@
     border-radius: 5px;
     border: 0.8px solid #7775796d;
     box-shadow: 0 0 8px rgba(0,0,0,0.4);
-    cursor: pointer;
     cursor: none;
 }
 

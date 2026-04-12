@@ -249,7 +249,6 @@ export default function LovrModels({
         )}
       </div>
 
-      {/* Footer: crear modelo */}
       <div className="shrink-0 border-t border-[#7d7d8140] px-5 sm:px-8 py-5">
         <button
           disabled={!!loading}

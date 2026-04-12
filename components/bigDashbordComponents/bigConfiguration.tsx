@@ -20,49 +20,36 @@ function SectionDivider({ label }: { label: string }) {
 function ToggleRow({
   label,
   description,
+  value, 
+  onChange
 }: {
   label: string;
   description?: string;
+  value: boolean;
+  onChange: (value: boolean) => void;
 }) {
   return (
-    <div className="flex items-center justify-between py-3 border-b border-white/5">
+    <div className="flex items-center justify-between pb-4 border-b border-white/5">
       <div>
-        <p className="text-(--white-color) text-[15px] font-medium">{label}</p>
+        <p className="text-(--white-color) text-[18px] font-medium">{label}</p>
         {description && (
-          <p className="text-(--white-color) opacity-40 text-[12px] mt-0.5">
+          <p className="text-(--white-color) opacity-40 text-[14px] mt-0.5">
             {description}
           </p>
         )}
       </div>
-    </div>
-  );
-}
-
-function SelectRow({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  options: { value: string; label: string }[];
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="flex items-center justify-between py-3 border-b border-white/5">
-      <p className="text-(--white-color) text-[15px] font-medium">{label}</p>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="bg-white/5 border border-white/10 text-(--white-color) text-[13px] rounded-lg px-3 py-1.5 outline-none cursor-pointer"
+      <button
+        onClick={() => onChange(!value)}
+        className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${
+          value ? "bg-green-600" : "bg-white/10"
+        }`}
       >
-        {options.map((o) => (
-          <option key={o.value} value={o.value} className="bg-[#1a1b1f]">
-            {o.label}
-          </option>
-        ))}
-      </select>
+        <span
+          className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-200 ${
+            value ? "translate-x-5" : "translate-x-0"
+          }`}
+        />
+      </button>
     </div>
   );
 }
@@ -83,11 +70,11 @@ function ActionRow({
 
 
   return (
-    <div className="flex items-center justify-between py-3 border-b border-white/5">
+    <div className="flex items-center justify-between pb-4 border-b border-white/5">
       <div>
-        <p className="text-(--white-color) text-[15px] font-medium">{label}</p>
+        <p className="text-(--white-color) text-[18px] font-medium">{label}</p>
         {description && (
-          <p className="text-(--white-color) opacity-40 text-[12px] mt-0.5 ">
+          <p className="text-(--white-color) opacity-40 text-[14px] mt-0.5 ">
             {description}
           </p>
         )}
@@ -112,6 +99,8 @@ export default function BigConfiguration({activeUser}: {activeUser: any}) {
   const route = useRouter();
 
   const [passwordChange, setPasswordChange] = useState(false);
+
+  const [privacy, setPrivacy] = useState(true)
 
 
   const handleChangePassword = () => {
@@ -151,14 +140,14 @@ export default function BigConfiguration({activeUser}: {activeUser: any}) {
         />
       </div>
       <p className="text-(--white-color) text-[17px]">
-        <span className="font-semibold">LOVR Versión: </span>1.4.3
+        <span className="font-semibold">LOVR Versión: </span>1.5.2
       </p>
 
       <SectionDivider label="Cuenta" />
 
       <ActionRow
         label="Contraseña"
-        description="Última actualización hace 3 meses"
+        description="Todo mientras lo recuerdes..."
         actionLabel={passwordChange ? "Cancelar cambio" : "Cambiar"}
         onClick={handleChangePassword}
       />
@@ -171,6 +160,8 @@ export default function BigConfiguration({activeUser}: {activeUser: any}) {
       <ToggleRow
         label="Compartir datos de uso"
         description="Ayúdanos a mejorar LOVR de forma anónima"
+        value={privacy}
+        onChange={()=> setPrivacy(!privacy)}
       /> 
       <SectionDivider label="Zona de peligro" />
 

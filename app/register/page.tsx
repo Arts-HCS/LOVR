@@ -96,10 +96,9 @@ export default function register() {
 
           {success ? (
             <div className="flex-1 flex flex-col items-center justify-between py-8">
-              {/* Espaciador top */}
+
               <div />
 
-              {/* Centro */}
               <div className="flex flex-col items-center gap-5">
 
                 <div className="text-center flex flex-col gap-2">
@@ -116,7 +115,6 @@ export default function register() {
                 </div>
               </div>
 
-              {/* CTA anclado abajo */}
               <Link
                 href="/login"
                 className="w-full text-center py-4 rounded-full text-(--white-color) text-base tracking-wide transition-all hover:opacity-80 active:scale-95"

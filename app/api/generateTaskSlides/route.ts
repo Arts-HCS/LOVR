@@ -38,14 +38,16 @@ Transforma el contenido proporcionado en una presentación de diapositivas clara
 <content_rules>
 - Incluye TODAS las ideas relevantes del texto original.
 - No omitas información importante para hacer el contenido más corto.
-- Si una diapositiva se satura, divide la información en varias.
-- La cantidad de diapositivas debe adaptarse al contenido (no hay mínimo ni máximo).
+- Divide en varias diapositivas si una se satura.
 </content_rules>
 
 <design_rules>
 - Títulos simples o en forma de pregunta.
-- Evitar adjetivos innecesarios como "central", "clave", "fundamental".
 - Mantener flujo narrativo entre diapositivas.
+- Usar bullet points SOLO para ideas clave independientes.
+- NO dividir una misma idea en varios bullet points.
+- Para explicar una sola idea, usar una oración completa o un párrafo corto.
+- En una diapositiva puede haber mezcla de párrafo(s) y bullet points.
 </design_rules>
 
 <format_rules>
@@ -55,12 +57,12 @@ Transforma el contenido proporcionado en una presentación de diapositivas clara
 
 - "content" SIEMPRE debe ser un string.
 - NUNCA usar arrays.
-- Cuando haya múltiples líneas, usar saltos de línea (\n) concatenados con "+".
+- Usar \n para saltos de línea y "+" para concatenar.
 
 Ejemplo:
-content: '• Punto uno.\n' +
-'• Punto dos.\n' +
-'• Punto tres.'
+content: 'Texto introductorio.\n' +
+'• Idea clave independiente.\n' +
+'• Otra idea relevante.'
 </format_rules>
 
 <structure_rules>
@@ -68,8 +70,14 @@ content: '• Punto uno.\n' +
   title = tema
   content = ${nombre}
 
-- Todas las referencias deben ir en una sola diapositiva al final.
+- Todas las referencias en una sola diapositiva al final.
 </structure_rules>
+
+<consistency_rules>
+- No repetir ideas entre diapositivas.
+- No resumir en exceso.
+- Priorizar cobertura completa sobre brevedad.
+</consistency_rules>
 
 <output_format>
 Devuelve ÚNICAMENTE JSON válido:
@@ -80,12 +88,6 @@ Devuelve ÚNICAMENTE JSON válido:
   ]
 }
 </output_format>
-
-<consistency_rules>
-- No repetir ideas entre diapositivas.
-- No resumir en exceso.
-- Priorizar cobertura completa sobre brevedad.
-</consistency_rules>
           `,
         },
         {
