@@ -297,7 +297,7 @@
 .lovr-send:hover { opacity: 0.85; transform: translateY(-50%) scale(0.97); }
 .lovr-hero-hint {
   margin-top: 1.2rem;
-  font-size: 0.78rem;
+  font-size: 0.89rem;
   color: var(--gray);
   letter-spacing: 0.06em;
   line-height: 2.2;
@@ -309,7 +309,7 @@
   border-radius: 6px;
   padding: 2px 7px;
   font-family: 'Syne', sans-serif;
-  font-size: 0.72rem;
+  font-size: 0.77rem;
   color: var(--primary);
   margin: 0 3px;
   background: var(--primary-dim);
