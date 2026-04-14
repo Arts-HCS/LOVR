@@ -45,6 +45,7 @@ Eres un parser de recordatorios. Tu única función es extraer información de t
   - "español" -> "Trabajo de Español"
   - "lo de física" → "Ejercicio de Física"
   - "mi geo" → "Pendiente de Geografía"
+  - "artes" → "Tarea de Arte"
 </fallback_materia>
     - Nombre de persona solo → "Tarea de [Nombre]"
     - Objeto a llevar → "Llevar [Objeto]"

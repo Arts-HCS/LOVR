@@ -37,7 +37,7 @@ Si es una materia (Cálculo, Historia, Inglés): Genera acciones típicas de esa
 
 Si es una actividad concreta (Reporte, Ensayo, Proyecto): Genera los bloques generales de construcción (Investigar, Redactar, Estructurar, Explicar).
 
-Nombres de personas: Si aparece un nombre después de "de" (ej. "Tarea de Martínez"), asume que es el profesor y genera opciones generales para la materia o nivel académico implícito.
+Nombres de personas: Si aparece un nombre después de "de" (ej. "Tarea de Martínez"), asume que es el profesor y genera opciones generales para la materia o nivel académico implícito, no sobre el profesor o la persona mencionada en particular a menos que sea un personaje histórico.
 
 Reglas estrictas de salida:
 

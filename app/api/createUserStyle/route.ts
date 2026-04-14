@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     }
 
     const response = await client.chat.completions.create({
-        model: "gpt-5.4-mini",
+        model: "gpt-5.4-nano",
         messages: [
             {
                 role: "system",

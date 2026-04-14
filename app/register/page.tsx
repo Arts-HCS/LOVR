@@ -107,7 +107,7 @@ export default function register() {
                   </p>
                   <h2 className="text-3xl xl:text-4xl font-medium text-(--white-color)">
                     ¡Qué gusto,{" "}
-                    <span style={{ color: "#eb6f6f" }}>{gottenName}!</span>
+                    <span style={{ color: "#B37EA1" }}>{gottenName}!</span>
                   </h2>
                   <p className="text-sm opacity-35 text-[16px] text-(--white-color) mt-1 mb-8">
                     Ya puedes iniciar sesión y comenzar a usar LOVR
@@ -119,7 +119,7 @@ export default function register() {
                 href="/login"
                 className="w-full text-center py-4 rounded-full text-(--white-color) text-base tracking-wide transition-all hover:opacity-80 active:scale-95"
                 style={{
-                  background: "rgba(235,111,111,0.12)",
+                  background: "#B37EA1",
                   border: "1px solid rgba(235,111,111,0.3)",
                 }}
               >
