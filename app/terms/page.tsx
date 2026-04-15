@@ -190,8 +190,8 @@ export default function TermsPage() {
         <div className="page-hero">
           <div className="page-tag">Legal</div>
           <h1 className="page-title">Términos de <em>servicio</em></h1>
-          <p className="page-meta">Última actualización: 28 de marzo de 2026 <br />
-          <b>Versión</b> 1.2</p>
+          <p className="page-meta">Última actualización: 30 de marzo de 2026 <br />
+          <b>Versión</b> 1.4</p>
         </div>
 
         {/* TWO-COLUMN LAYOUT */}
@@ -244,26 +244,26 @@ export default function TermsPage() {
                 <li>Realizar ingeniería inversa, descompilar o intentar extraer el código fuente de la plataforma.</li>
               </ul>
               <div className="page-warn">
-                <p>La violación de estos términos puede resultar en la suspensión inmediata de tu cuenta.</p>
+                <p>La violación de estos términos resultará en la suspensión inmediata de tu cuenta.</p>
               </div>
             </div>
 
             <div id="propiedad" className="page-section">
               <h2>Propiedad intelectual</h2>
-              <p>LOVR y todos sus componentes — incluyendo el diseño, la marca, el código y la tecnología subyacente — son propiedad exclusiva de LOVR o sus licenciantes. Están protegidos por leyes de propiedad intelectual aplicables.</p>
+              <p>LOVR y todos sus componentes — incluyendo el diseño, la marca, el código y la tecnología subyacente — son propiedad exclusiva de LOVR o sus licenciantes. </p>
               <p>No se te concede ningún derecho sobre la marca LOVR ni sobre ningún elemento de la plataforma más allá del uso limitado descrito en estos términos.</p>
             </div>
 
             <div id="limitaciones" className="page-section">
               <h2>Limitaciones de responsabilidad</h2>
-              <p>LOVR se proporciona "tal cual". No garantizamos que el servicio esté disponible de forma ininterrumpida, libre de errores o completamente adecuado para todos los usos.</p>
-              <p>En ningún caso LOVR será responsable por daños indirectos, incidentales o consecuentes derivados del uso o la imposibilidad de uso del servicio. Nuestra responsabilidad total está limitada al monto que hayas pagado en los últimos 12 meses.</p>
+              <p>No garantizamos que el servicio esté disponible de forma ininterrumpida, libre de errores o completamente adecuado para todos los usos.</p>
+              <p>En ningún caso LOVR será responsable por daños indirectos, incidentales o consecuentes derivados del uso o la imposibilidad de uso del servicio.</p>
             </div>
 
             <div id="terminacion" className="page-section">
               <h2>Terminación</h2>
-              <p>Puedes dejar de usar LOVR en cualquier momento eliminando tu cuenta desde la configuración. Tras la eliminación, tus datos serán borrados en un plazo de 30 días.</p>
-              <p>LOVR puede suspender o terminar tu acceso si violas estos términos, si detectamos actividad fraudulenta o si el servicio es descontinuado. En caso de descontinuación, te notificaremos con al menos 60 días de anticipación.</p>
+              <p>Puedes dejar de usar LOVR en cualquier momento eliminando tu cuenta desde la configuración. Tras la eliminación, tus datos serán borrados en un plazo de 24 horas.</p>
+              <p>LOVR puede suspender o terminar tu acceso si violas estos términos, si detectamos actividad fraudulenta o si el servicio es descontinuado. En caso de descontinuación, te notificaremos con al menos 30 días de anticipación.</p>
             </div>
 
             <div id="cambios" className="page-section">

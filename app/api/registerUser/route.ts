@@ -46,7 +46,19 @@ export async function POST(req: Request) {
     client.chat.completions.create({
         model: "gpt-5-nano",
         messages: [
-            { role: "system", content: "Escribe 'H' si el nombre de la persona es hombre o 'M' si es mujer, sin comillas. Utiliza información según su origen histórico y personas que lo han tenido en el pasado. Elegir un género no tendrá ninguna repercusión en ninguna persona. En caso de que sea una secuencia sin sentido, si las letras son parecidas a 'M' o 'N', elige 'H', si son parecidas a 'B' o 'L', elige 'M'. Siempre devuelve una respuesta, nunca una excusa o pregunta." },
+            { role: "system", content: `Escribe únicamente H o M según el género asociado al nombre.
+
+H si es masculino
+M si es femenino
+
+Determina el género usando referencias históricas y uso común del nombre.
+Si el nombre es ambiguo o no tiene sentido, AUN ASÍ DEBES ELEGIR:
+
+* Letras similares a M o N → H
+* Letras similares a B o L → M
+
+Nunca omitas la respuesta. Nunca hagas preguntas. Siempre devuelve solo una letra: H o M.
+` },
             { role: "user", content: name }
         ]
     })

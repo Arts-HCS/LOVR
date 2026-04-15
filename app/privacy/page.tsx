@@ -145,7 +145,7 @@ export default function PrivacyPage() {
           <ul>
             <li>Información de cuenta: nombre, correo electrónico y contraseña cifrada.</li>
             <li>Contenido que introduces: tareas, textos y archivos que compartes para generar resultados.</li>
-            <li>Datos de uso: páginas visitadas, acciones dentro de la plataforma y preferencias de configuración.</li>
+            <li>Datos de uso: acciones dentro de la plataforma y preferencias analizadas.</li>
             <li>Información técnica: tipo de dispositivo, navegador y dirección IP para seguridad y soporte.</li>
           </ul>
           <div className="page-highlight">
@@ -162,7 +162,6 @@ export default function PrivacyPage() {
           <ul>
             <li>Personalizar los resultados de LOVR con tu estilo de escritura y preferencias.</li>
             <li>Mejorar la precisión del agente a lo largo del tiempo mediante patrones de uso.</li>
-            <li>Enviarte comunicaciones relevantes sobre tu cuenta, cambios en el servicio o novedades que hayas solicitado.</li>
             <li>Garantizar la seguridad de tu cuenta y detectar actividad inusual.</li>
           </ul>
         </>
@@ -174,7 +173,8 @@ export default function PrivacyPage() {
         <>
           <p>Tu información se almacena en servidores seguros con cifrado en reposo y en tránsito. Utilizamos protocolos estándar de la industria (TLS 1.3, AES-256) para proteger todos los datos.</p>
           <p>El acceso a tu información está restringido a los sistemas automatizados de LOVR y, en casos excepcionales de soporte técnico, a personal autorizado bajo estrictos protocolos de confidencialidad.</p>
-          <p>Conservamos tus datos mientras tu cuenta esté activa. Si decides eliminar tu cuenta, tus datos se borran de nuestros sistemas en un plazo máximo de 30 días.</p>
+          <p>Conservamos tus datos mientras tu cuenta esté activa. Si decides eliminar tu cuenta, tus datos se borran de nuestros sistemas en un plazo máximo de 24 horas.</p>
+          <p>En cualquier momento puedes pedir la eliminación completa de tu cuenta y datos asociados.</p>
         </>
       ),
     },
@@ -182,24 +182,7 @@ export default function PrivacyPage() {
       title: 'Cookies y tecnologías similares',
       content: (
         <>
-          <p>Usamos cookies esenciales para mantener tu sesión activa y cookies de rendimiento para entender cómo se usa la plataforma. No utilizamos cookies de publicidad ni rastreo de terceros.</p>
-          <p>Puedes controlar las cookies desde la configuración de tu navegador. Desactivar las cookies esenciales puede afectar el funcionamiento de la plataforma.</p>
-        </>
-      ),
-    },
-    {
-      title: 'Tus derechos',
-      content: (
-        <>
-          <p>Tienes control total sobre tu información. En cualquier momento puedes:</p>
-          <ul>
-            <li>Acceder a todos los datos que tenemos sobre ti desde tu perfil.</li>
-            <li>Solicitar la corrección de información incorrecta o desactualizada.</li>
-            <li>Pedir la eliminación completa de tu cuenta y datos asociados.</li>
-            <li>Exportar tu información en formato portable (JSON o CSV).</li>
-            <li>Revocar permisos de acceso a integraciones externas en cualquier momento.</li>
-          </ul>
-          
+          <p>Usamos cookies para mantener tu sesión activa y cookies de rendimiento para entender cómo se usa la plataforma. No utilizamos cookies de publicidad ni rastreo de terceros.</p>
         </>
       ),
     },
@@ -225,7 +208,7 @@ export default function PrivacyPage() {
         <div className="page-hero">
           <div className="page-tag">Legal</div>
           <h1 className="page-title">Política de <em>privacidad</em></h1>
-          <p className="page-meta">Última actualización: 19 de marzo de 2026 <br /> <b>Versión</b> 1.0</p>
+          <p className="page-meta">Última actualización: 10 de abril de 2026 <br /> <b>Versión</b> 1.6</p>
         </div>
 
         {/* CONTENT */}
