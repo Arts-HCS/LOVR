@@ -1,36 +1,136 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# LOVR
+
+LOVR is a student productivity platform designed to make academic life easier.  
+Instead of forcing users to manually manage tasks in a rigid calendar, LOVR lets them add things naturally, almost like talking to someone.
+
+You can write something like:
+
+> "Entregar la cosa de historia para el siguiente martes"
+
+and LOVR will understand it, create the task, and place it on the correct day.  
+From there, you can add context, generate academic content, export it to Google Docs with MLA or APA formatting, or turn the response into slides.
+
+LOVR also lets you build your own writing models by importing your own documents or texts, so generated content matches your style instead of sounding like generic AI.
+
+## Features
+
+- Smart calendar with natural-language task input
+- Task context support for organizing all the material you need
+- AI-powered content generation
+- Export to Google Docs
+- MLA and APA formatting support
+- Slide generation from generated content
+- Custom writing models based on your own texts
+- Google API integration
+- OpenAI API integration
+
+## Tech Stack
+
+- **Frontend:** Next.js
+- **Database:** MySQL, later migrated to PostgreSQL
+- **ORM:** Prisma
+- **APIs:** Google APIs, OpenAI API, REST APIs
+- **Language:** JavaScript / TypeScript
+
+## Project Goal
+
+The goal of LOVR is to reduce friction in student workflow.
+
+Instead of:
+- opening a calendar,
+- selecting a date manually,
+- typing tasks in a strict format,
+- rewriting content in different tools,
+
+LOVR lets users enter information naturally and then turns it into something useful.
+
+## How It Works
+
+### 1. Add tasks naturally
+Users type tasks in plain language. LOVR interprets the date and task automatically.
+
+### 2. Add context
+Each task can store extra context such as:
+- notes
+- copied text
+- instructions
+- images
+- reference material
+
+### 3. Generate output
+LOVR uses the stored context to generate structured responses that can be exported to:
+- Google Docs
+- Slides
+
+### 4. Match the user’s style
+Users can create LOVR models from their own writing so the generated text sounds more personal and less like AI.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+Make sure you have:
+- Node.js installed
+- a database running
+- API keys for Google and OpenAI
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/your-username/lovr.git
+cd lovr
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment Variables
+Create a .env file in the root of the project and add your variables:
+```bash
+DATABASE_URL="your-database-url"
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+GOOGLE_REDIRECT_URI="your-google-redirect-uri"
+OPENAI_API_KEY="your-openai-api-key"
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Database Setup
+If you're using Prisma:
+```bash
+npx prisma generate
+npx prisma migrate dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Run the project
+```bash
+npm run dev
+```
 
-## Learn More
+## Future Improvements
 
-To learn more about Next.js, take a look at the following resources:
+- Better task parsing  
+- Improved AI context handling  
+- More export formats  
+- Better slide customization  
+- Stronger model training for writing style  
+- Collaboration features  
+- Mobile-friendly improvements  
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Contributing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This project is currently developed by a single creator, but suggestions and feedback are always welcome.
 
-## Deploy on Vercel
+Areas where contributions would be especially valuable:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Adding support for modifying the date and time of existing tasks  
+- Expanding features within the LOVR panel  
+- Improving data handling, validation, and overall data flow  
+- Enhancing performance and scalability  
+- Improving UI/UX consistency across the platform  
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+If you plan to contribute, consider opening an issue first to discuss the change before submitting a pull request.
+
+## Contact
+
+Created by Arturo Sandoval Cervantes  
+www.linkedin.com/in/arturo-sandoval-cervantes-67a892377
+
+
+
