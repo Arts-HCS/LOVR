@@ -76,7 +76,7 @@ Make sure you have:
 ### Installation
 
 ```bash
-git clone https://github.com/your-username/lovr.git
+git clone https://github.com/Arts-HCS/LOVR.git
 cd lovr
 npm install
 ```
