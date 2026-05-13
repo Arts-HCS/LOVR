@@ -15,19 +15,31 @@ const STYLE_PROMPT = readFileSync(
 );
 
 export async function POST(req: Request) {
-
   const body = await req.json();
   const { content } = body;
 
   const now = new Date();
-  const today = now.toLocaleDateString("en-CA", {
+
+  const formatterDate = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Mexico_City",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
   });
 
-  const time = now.toLocaleTimeString("es-MX", {
+  const formatterHour = new Intl.DateTimeFormat("es-MX", {
     timeZone: "America/Mexico_City",
+    hour: "2-digit",
     hour12: false,
   });
+
+  const today = formatterDate.format(now);
+  const currentHour = Number(formatterHour.format(now));
+
+  const defaultDate =
+    currentHour < 14
+      ? today
+      : formatterDate.format(new Date(now.getTime() + 24 * 60 * 60 * 1000));
 
   const response = await client.chat.completions.create({
     model: "gpt-5.4-nano",
@@ -36,7 +48,8 @@ export async function POST(req: Request) {
         role: "system",
         content: `
                 Hoy es ${today}.
-                Hora actual ${time}.
+                Hora actual ${currentHour}:00.
+                Si el usuario no menciona día ni fecha, usa obligatoriamente ${defaultDate}.
 
                 ${STYLE_PROMPT}
                     `,
@@ -45,7 +58,7 @@ export async function POST(req: Request) {
         role: "user",
         content,
       },
-    ]
+    ],
   });
 
   const { choices } = response;

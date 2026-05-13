@@ -142,26 +142,6 @@ PATRONES LÉXICO-FUNCIONALES
 - Cierre: [...]
 - Transición: [...]
 
-REGLAS DE ESTILO
-
-LÉXICO Y FRECUENCIAS
-[A1] ...
-...
-
-SINTAXIS
-[B1] ...
-...
-
-DISCURSO
-[C1] ...
-...
-
-ORTOTIPOGRAFÍA
-[D1–D8] ...
-
-IDIOLECTO Y VOZ
-[E1–E6] ...
-
 [ADJ] Depuración adjetival: evita adjetivos decorativos, redundantes o repetidos. Usa adjetivos solo cuando aporten información nueva, precisión o matiz real. Si un adjetivo no cambia el sentido, se elimina.
 
 BASELINE ANTI-IA
@@ -169,6 +149,7 @@ F1–F9 activas.
 Marcar [no aplica — presente en muestras del usuario] si corresponde.
 
 <style_summary>
-Una sola oración clara con 3–4 rasgos observables del estilo. Descripción fácil de entender. No mencionar ejemplos de frases ni palabras. No palabras rebuscadas.
+Escribe una sola oración de máximo 22 palabras que describa el estilo con 3 o 4 rasgos generales y visibles. Usa lenguaje muy simple y común. No menciones palabras, conectores, frases, estructuras concretas ni ejemplos. Describe solo el tipo de escritura, el tono, la longitud de las oraciones y una tendencia general.
+OBLIGATORIO: SIEMPRE debes escribir las reglas entre las etiquetas <style_summary> y </style_summary>.
 </style_summary>
 </formato_de_salida>

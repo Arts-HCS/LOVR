@@ -42,6 +42,7 @@ export async function POST(req: Request) {
     });
 
     const rulebook = response.choices[0].message.content;
+    console.log(rulebook)
 
     if (!rulebook) {
         return NextResponse.json(
