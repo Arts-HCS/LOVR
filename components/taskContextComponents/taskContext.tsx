@@ -144,6 +144,7 @@ export default function TaskContext({
     generateAnswer(prompt);
   };
 
+
   return (
     <div className="w-full sm:w-[50%] rounded-xl mr-0 sm:mr-2 flex flex-col items-start justify-start overflow-scroll h-auto sm:h-158 pr-0 sm:pr-8 pb-10 sm:pb-40 mb-6 sm:mb-0">
       <div className="bg-[#46343c90] pb-4 shadow-[0_4px_20px_rgba(0,0,0,0.1)] flex flex-col w-full h-fit rounded-2xl">
@@ -310,16 +311,33 @@ export default function TaskContext({
             placeholder="Ingresa tu información..."
             value={tasksAnswers[receivedID]?.[taskSelected]?.fourthInput || ""}
             onChange={(e) => {
-              setTasksAnswers((prev: any) => ({
-                ...prev,
-                [receivedID]: {
-                  ...prev[receivedID],
-                  [taskSelected]: {
-                    ...prev[receivedID][taskSelected],
-                    fourthInput: e.target.value,
+
+              if (!tasksAnswers[receivedID]){
+                setTasksAnswers((prev:any) => ({
+                  ...prev,
+                  [receivedID]: {
+                    ...prev[receivedID],
+                    [5]: {
+                      
+                    }
+                  }
+                }))
+              } else {
+
+                setTasksAnswers((prev: any) => ({
+                  ...prev,
+                  [receivedID]: {
+                    ...prev[receivedID],
+                    [taskSelected]: {
+                      ...prev[receivedID][taskSelected],
+                      fourthInput: e.target.value,
+                    },
                   },
-                },
-              }));
+                }));
+
+              }
+
+              
             }}
           ></textarea>
         </form>

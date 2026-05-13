@@ -76,7 +76,7 @@ function StepTwo({ onNext, onBack, activeUser, setStep, stepFourCompleted }: { o
         </div>
 
         <p className="text-[15px] sm:text-[17px] text-[#bebebe] w-full sm:w-full mt-4">
-          Tu modelo de LOVR necesita conocer tu estilo de escritura para comenzar a aprender de él. <br /> Puedes decidir entre compartir textos que hayas escrito antes, escribir uno corto en este momento, o hacer ambas cosas. Entre más compartas tu estilo, más rápido aprenderá tu LOVR. Si estás {activeUser.gender === "M" ? "lista" : "listo"} para hacerlo, continúa presionando el botón de "Iniciar configuración".
+          Tu modelo necesita conocer tu estilo de escritura para comenzar a aprender de él. <br /> Puedes decidir entre compartir textos que hayas escrito antes, escribir uno corto en este momento, o hacer ambas cosas. Entre más compartas tu estilo, más rápido aprenderá tu LOVR. Si estás {activeUser.gender === "M" ? "lista" : "listo"} para hacerlo, continúa presionando el botón de "Iniciar configuración".
         </p>
 
         {!stepFourCompleted ? (

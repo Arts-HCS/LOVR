@@ -11,27 +11,22 @@ function StepOne({ onNext, setOnBoardActive, activeUser }: { onNext: () => void,
 
         <br /><br />
 
-        Puedes usarlo para:
+        Puedes:
 
-        <br /><br />
+        <br />
 
         1. Compartir textos y/o ideas de los que te gustaría que tu LOVR aprendiera.
         <br />
         2. Hacer feedback inmediato, corrigiendo directamente las cosas que no te gustan sobre tu LOVR.
         <br />
-        3. Integrarlo a proyectos que requieran recordar detalles específicos, hacer investigaciones, lluvia de ideas y cualquier otra tarea.
 
-        <br /><br />
+        <br />
 
         Tu LOVR es único. Aprenderá automáticamente, pero también puedes acelerar su aprendizaje ajustándolo manualmente.
 
         <br /><br />
 
-        El corazón en el centro del menú se tornará más rojo entre más se asemeje tu LOVR a ti.
-
-        <br /><br />
-
-        Si tienes preguntas sobre las políticas de privacidad, seguridad de usuario, configuración avanzada de LOVR y su uso, ingresa a <Link className="text-[#9d7880]" href={"/"}>este link</Link>.
+        Si tienes preguntas sobre las políticas de privacidad, seguridad de usuario, configuración avanzada de LOVR y su uso, ingresa a <Link className="text-[#9d7880]" href={"/terms"}>este link</Link>.
       </p>
       <div className="w-full mt-auto flex items-center justify-end gap-3 sm:gap-5 pt-4">
         <button

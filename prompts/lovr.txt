@@ -149,7 +149,7 @@ F1–F9 activas.
 Marcar [no aplica — presente en muestras del usuario] si corresponde.
 
 <style_summary>
-Escribe una sola oración de máximo 22 palabras que describa el estilo con 3 o 4 rasgos generales y visibles. Usa lenguaje muy simple y común. No menciones palabras, conectores, frases, estructuras concretas ni ejemplos. Describe solo el tipo de escritura, el tono, la longitud de las oraciones y una tendencia general.
+Escribe una sola oración de máximo 22 palabras que describa el estilo con 3 o 4 rasgos generales y visibles. Usa lenguaje muy simple y común. No menciones palabras, conectores, frases, estructuras concretas ni ejemplos. Describe solo el tipo de escritura, el tono, la longitud de las oraciones y una tendencia general. No menciones el idioma en el que escribe.
 OBLIGATORIO: SIEMPRE debes escribir las reglas entre las etiquetas <style_summary> y </style_summary>.
 </style_summary>
 </formato_de_salida>
