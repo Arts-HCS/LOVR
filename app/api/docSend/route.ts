@@ -1,28 +1,22 @@
-import { PrismaClient } from "@prisma/client";
+// your route file
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-const prisma = new PrismaClient();
+export async function POST(req: Request) {
+  const body = await req.json();
+  const { userID, content } = body;
 
-export async function POST(req:Request){
-    const body = await req.json()
-    const {userID, content} = body;
+  for (const doc of content) {
+    const docAlreadyExists = await prisma.docs.findFirst({
+      where: { userID, content: doc },
+    });
 
-    content.forEach(async (doc:any)=>{
+    if (docAlreadyExists) continue; 
 
-        const docAlreadyExists = await prisma.docs.findFirst({
-            where: {userID, content: doc}
-        })
-        if (docAlreadyExists) return
+    await prisma.docs.create({
+      data: { userID, content: doc },
+    });
+  }
 
-        await prisma.docs.create({
-            data: {
-                userID,
-                content: doc
-            }
-        })
-    })
-
-    return NextResponse.json({
-        message: "exito"
-    })
+  return NextResponse.json({ message: "exito" });
 }
